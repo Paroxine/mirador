@@ -1,0 +1,30 @@
+{
+	"anafi":
+	{
+		"type": "uav",
+		"adjustable_camera": true,
+		"multiple_cameras": false,
+		"stream_address": "http://stream.jpg",
+		"cmd_vel_topic": "/cmd_vel",
+		
+		"take_off": "/take_off",
+		"land_topic": "/land",
+		"rtl_topic": "/rtl"
+	},
+	"husky":
+	{
+		"type": "ugv",
+		"adjustable_camera": false,
+		"multiple_cameras": true,
+		"stream_address": "http://stream.jpg",
+		"cmd_vel_topic": "/cmd_vel"
+	},
+	"warthog":
+	{
+		"type": "ugv",
+		"adjustable_camera": false,
+		"multiple_camera": false,
+		"stream_address": "http://stream.jpg",
+		"cmd_vel_topic": "/cmd_vel"
+	}
+}

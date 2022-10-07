@@ -1,0 +1,49 @@
+doctype html
+html(lang="en")
+    head
+        title= "Mirador"
+        meta(charset="utf-8")
+        meta(name="viewport" content="width=device-width, initial-scale=1")
+        link(href="/node_modules/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet")
+        script(src="/node_modules/bootstrap/dist/js/bootstrap.bundle.min.js")
+        link(href="/public/css/login.css" rel="stylesheet")
+
+        // Favicons
+        link(rel='apple-touch-icon' href='/public/img/favicons/apple-touch-icon.png' sizes='180x180')
+        link(rel='icon' href='/public/img/favicons/favicon-32x32.png' sizes='32x32' type='image/png')
+        link(rel='icon' href='/public/img/favicons/favicon-16x16.png' sizes='16x16' type='image/png')
+        link(rel='manifest' href='/public/img/favicons/manifest.json')
+        link(rel='mask-icon' href='/public/img/favicons/safari-pinned-tab.svg' color='#048b9a')
+        link(rel="icon" type="image/svg+xml" href="/assets/images/favicon.svg")
+        link(rel="icon" type="image/png" href="/assets/images/favicon.png")
+        meta(name='theme-color' content='#048b9a')
+    body.text-center
+        main.form-signin.w-100.m-auto
+            form.needs-validation(action="" method="post")
+                div.pb-3.text-center
+                    img.d-block.mx-auto.mb-3(src="/public/img/mirador-icon.svg" alt width="92" height="92")
+                    h1 Mirador
+                h2.h3.mb-3.fw-normal Please connect a robot
+                select.form-select.mb-3(aria-label="robot_class" name="robot_class" required)
+                    option(value="" selected) Select a class
+                    option(value="husky" selected=(robot_class === "husky")) Husky
+                    option(value="anafi" selected=(robot_class === "anafi")) Anafi
+                    option(value="warthog" selected=(robot_class === "warthog")) Warthog
+                div.form-floating
+                    input.form-control(type="text" id="floatingName" placeholder="Robot" name="name" value=name required)
+                    label(for="floatingName") Robot name
+                div.form-floating
+                    input.form-control(type="text" id="floatingAddress" placeholder="127.0.0.1" name="address" value=address required)
+                    label(for="floatingAddress") Address
+                    div(class="invalid-tooltip") Address is invalid (ex: 192.168.1.2)
+                div.form-floating.mb-3
+                    input.form-control(type="text" id="floatingPort" placeholder="9090" name="port" value=port required)
+                    label(for="floatingPort") Port
+                    div(class="invalid-tooltip") Port is invalid (ex: 9090)
+                div.input-group.mb-3
+                    span.input-group-text Pick your robot color
+                    input.form-control.form-control-color(type="color" id="color" value=(color || "#048b9a") title="Choose your color" name="color")
+                button.w-100.btn.btn-lg.btn-primary(type="submit") Connect
+                p.mt-4.mb-3.text-muted © 2022
+    
+    script(src="/public/js/login.js")

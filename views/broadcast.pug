@@ -1,0 +1,16 @@
+doctype html
+html(lang="en")
+    head
+        title Broadcaster
+        meta(charset='UTF-8')
+        script(src="/node_modules/socket.io/client-dist/socket.io.min.js")
+
+    body
+        section
+        label(for='audioSource') Audio source: 
+        select#audioSource
+        section
+        label(for='videoSource') Video source: 
+        select#videoSource
+
+    script(src='/public/js/broadcast.js')

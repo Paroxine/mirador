@@ -1,0 +1,6 @@
+login:
+    robot_class: "husky"
+    name: "paquerette"
+    address: "127.0.0.1"
+    port: 9090
+    color: "#000000"

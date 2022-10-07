@@ -1,0 +1,470 @@
+doctype html
+html
+    head
+        title= `${name}` + " (" + `${robot_class}`[0].toUpperCase() + `${robot_class}`.substring(1) + ") · Mirador"
+        meta(charset="utf-8")
+        meta(name="viewport" content="width=device-width, initial-scale=1")
+        link(href="/node_modules/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet")
+        script(src="/node_modules/bootstrap/dist/js/bootstrap.bundle.min.js")
+        link(href='/node_modules/leaflet/dist/leaflet.css' rel='stylesheet')
+        script(src="/node_modules/leaflet/dist/leaflet.js")
+        script(src="/node_modules/jquery/dist/jquery.min.js")
+        script(src="/node_modules/socket.io/client-dist/socket.io.min.js")
+        script(src="/node_modules/nipplejs/dist/nipplejs.js")
+        script(src="/node_modules/sortablejs/Sortable.min.js")
+        link(href="/public/css/robot.css" rel="stylesheet")
+
+        // Favicons
+        link(rel='apple-touch-icon' href='/public/img/favicons/apple-touch-icon.png' sizes='180x180')
+        link(rel='icon' href='/public/img/favicons/favicon-32x32.png' sizes='32x32' type='image/png')
+        link(rel='icon' href='/public/img/favicons/favicon-16x16.png' sizes='16x16' type='image/png')
+        link(rel='manifest' href='/public/img/favicons/manifest.json')
+        link(rel='mask-icon' href='/public/img/favicons/safari-pinned-tab.svg' color='#048b9a')
+        link(rel="icon" type="image/svg+xml" href="/assets/images/favicon.svg")
+        link(rel="icon" type="image/png" href="/assets/images/favicon.png")
+        meta(name='theme-color' content=`${color}`)
+    body
+        svg(xmlns='http://www.w3.org/2000/svg' style='display: none;')
+            symbol#mirador(viewbox='0 0 1280 1280')
+                title Mirador
+                path(transform='translate(0 1280) scale(.1 -.1)' fill-rule='evenodd' d='M1390 12793c-182-20-364-70-515-143-452-217-759-621-852-1120-17-90-18-353-18-5125 0-4847 1-5034 18-5135 113-640 607-1134 1247-1247 101-17 288-18 5135-18 4772 0 5035 1 5125 18 564 105 1015 493 1189 1023 21 65 47 166 58 224 17 101 18 288 18 5135 0 4772-1 5035-18 5125-119 641-590 1115-1237 1247-80 16-384 17-5100 19-2758 0-5031-1-5050-3zm5701-1493c393-176 958-430 1256-563l542-242 1-1222v-1230c0-5-192-10-427-13-373-4-428-7-426-20 3-16 174-794 573-2595 284-1281 850-3840 886-4008 15-65 25-120 23-121-2-2-197-6-434-7l-430-4-68 303-67 303-1047 1277c-575 702-1059 1291-1074 1309l-27 31-1073-1307-1072-1307-67-302c-36-166-68-303-71-305-2-2-199-1-437 1-395 4-432 6-428 21 3 9 32 142 66 296 58 267 437 1979 1110 5017 171 768 310 1401 310 1407 0 8-126 11-430 11h-430l2 1231 3 1232 330 148c182 81 746 334 1255 563 509 228 928 415 931 416 4 0 328-144 720-320z')
+                path(transform='translate(0 1280) scale(.1 -.1)' fill-rule='evenodd' d='M4800 9530v-620h1575 1575l-2 618-3 617-1572 3-1573 2v-620z')
+                path(transform='translate(0 1280) scale(.1 -.1)' fill-rule='evenodd' d='M5585 8018c-3-7-59-256-124-552-95-430-117-543-108-556 74-101 1022-1249 1027-1243 7 7 909 1113 988 1211l35 43-52 242c-29 133-83 382-120 552l-68 310-787 3c-624 2-788 0-791-10z')
+                path(transform='translate(0 1280) scale(.1 -.1)' fill-rule='evenodd' d='M5083 5762c-29-130-154-696-278-1256-124-561-224-1020-222-1021 3-3 1279 1552 1296 1580 13 21-2 42-340 451-195 236-364 442-375 457-12 15-23 27-25 27s-27-107-56-238z')
+                path(transform='translate(0 1280) scale(.1 -.1)' fill-rule='evenodd' d='M7226 5543c-207-251-375-460-374-464 5-14 1301-1589 1305-1586 4 5-545 2497-551 2505-2 1-172-204-380-455z')
+            symbol#home(viewbox='0 0 16 16')
+                path(d='M8.354 1.146a.5.5 0 0 0-.708 0l-6 6A.5.5 0 0 0 1.5 7.5v7a.5.5 0 0 0 .5.5h4.5a.5.5 0 0 0 .5-.5v-4h2v4a.5.5 0 0 0 .5.5H14a.5.5 0 0 0 .5-.5v-7a.5.5 0 0 0-.146-.354L13 5.793V2.5a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5v1.293L8.354 1.146zM2.5 14V7.707l5.5-5.5 5.5 5.5V14H10v-4a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5v4H2.5z')
+            symbol#speedometer(viewbox='0 0 16 16')
+                path(d='M8 2a.5.5 0 0 1 .5.5V4a.5.5 0 0 1-1 0V2.5A.5.5 0 0 1 8 2zM3.732 3.732a.5.5 0 0 1 .707 0l.915.914a.5.5 0 1 1-.708.708l-.914-.915a.5.5 0 0 1 0-.707zM2 8a.5.5 0 0 1 .5-.5h1.586a.5.5 0 0 1 0 1H2.5A.5.5 0 0 1 2 8zm9.5 0a.5.5 0 0 1 .5-.5h1.5a.5.5 0 0 1 0 1H12a.5.5 0 0 1-.5-.5zm.754-4.246a.389.389 0 0 0-.527-.02L7.547 7.31A.91.91 0 1 0 8.85 8.569l3.434-4.297a.389.389 0 0 0-.029-.518z')
+                path(fill-rule='evenodd' d='M6.664 15.889A8 8 0 1 1 9.336.11a8 8 0 0 1-2.672 15.78zm-4.665-4.283A11.945 11.945 0 0 1 8 10c2.186 0 4.236.585 6.001 1.606a7 7 0 1 0-12.002 0z')
+            symbol#signpost(viewbox='0 0 16 16')
+                path(path d='M7 1.414V4H2a1 1 0 0 0-1 1v4a1 1 0 0 0 1 1h5v6h2v-6h3.532a1 1 0 0 0 .768-.36l1.933-2.32a.5.5 0 0 0 0-.64L13.3 4.36a1 1 0 0 0-.768-.36H9V1.414a1 1 0 0 0-2 0zM12.532 5l1.666 2-1.666 2H2V5h10.532z')   
+            symbol#cursor-fill(viewbox='0 0 16 16')
+                path(path d='M14.082 2.182a.5.5 0 0 1 .103.557L8.528 15.467a.5.5 0 0 1-.917-.007L5.57 10.694.803 8.652a.5.5 0 0 1-.006-.916l12.728-5.657a.5.5 0 0 1 .556.103z')
+            symbol#map(viewbox='0 0 16 16')
+                path(path fill-rule='evenodd' d='M15.817.113A.5.5 0 0 1 16 .5v14a.5.5 0 0 1-.402.49l-5 1a.502.502 0 0 1-.196 0L5.5 15.01l-4.902.98A.5.5 0 0 1 0 15.5v-14a.5.5 0 0 1 .402-.49l5-1a.5.5 0 0 1 .196 0L10.5.99l4.902-.98a.5.5 0 0 1 .415.103zM10 1.91l-4-.8v12.98l4 .8V1.91zm1 12.98 4-.8V1.11l-4 .8v12.98zm-6-.8V1.11l-4 .8v12.98l4-.8z')
+            symbol#geo(viewbox='0 0 16 16')
+                path(fill-rule='evenodd' d='M8 1a3 3 0 1 0 0 6 3 3 0 0 0 0-6zM4 4a4 4 0 1 1 4.5 3.969V13.5a.5.5 0 0 1-1 0V7.97A4 4 0 0 1 4 3.999zm2.493 8.574a.5.5 0 0 1-.411.575c-.712.118-1.28.295-1.655.493a1.319 1.319 0 0 0-.37.265.301.301 0 0 0-.057.09V14l.002.008a.147.147 0 0 0 .016.033.617.617 0 0 0 .145.15c.165.13.435.27.813.395.751.25 1.82.414 3.024.414s2.273-.163 3.024-.414c.378-.126.648-.265.813-.395a.619.619 0 0 0 .146-.15.148.148 0 0 0 .015-.033L12 14v-.004a.301.301 0 0 0-.057-.09 1.318 1.318 0 0 0-.37-.264c-.376-.198-.943-.375-1.655-.493a.5.5 0 1 1 .164-.986c.77.127 1.452.328 1.957.594C12.5 13 13 13.4 13 14c0 .426-.26.752-.544.977-.29.228-.68.413-1.116.558-.878.293-2.059.465-3.34.465-1.281 0-2.462-.172-3.34-.465-.436-.145-.826-.33-1.116-.558C3.26 14.752 3 14.426 3 14c0-.599.5-1 .961-1.243.505-.266 1.187-.467 1.957-.594a.5.5 0 0 1 .575.411z')
+            symbol#controller(viewbox='0 0 16 16')
+                path(path fill-rule='evenodd' d='M11.5 6.027a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0zm-1.5 1.5a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1zm2.5-.5a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0zm-1.5 1.5a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1zm-6.5-3h1v1h1v1h-1v1h-1v-1h-1v-1h1v-1z')
+                path(path fill-rule='evenodd' d='M3.051 3.26a.5.5 0 0 1 .354-.613l1.932-.518a.5.5 0 0 1 .62.39c.655-.079 1.35-.117 2.043-.117.72 0 1.443.041 2.12.126a.5.5 0 0 1 .622-.399l1.932.518a.5.5 0 0 1 .306.729c.14.09.266.19.373.297.408.408.78 1.05 1.095 1.772.32.733.599 1.591.805 2.466.206.875.34 1.78.364 2.606.024.816-.059 1.602-.328 2.21a1.42 1.42 0 0 1-1.445.83c-.636-.067-1.115-.394-1.513-.773-.245-.232-.496-.526-.739-.808-.126-.148-.25-.292-.368-.423-.728-.804-1.597-1.527-3.224-1.527-1.627 0-2.496.723-3.224 1.527-.119.131-.242.275-.368.423-.243.282-.494.575-.739.808-.398.38-.877.706-1.513.773a1.42 1.42 0 0 1-1.445-.83c-.27-.608-.352-1.395-.329-2.21.024-.826.16-1.73.365-2.606.206-.875.486-1.733.805-2.466.315-.722.687-1.364 1.094-1.772a2.34 2.34 0 0 1 .433-.335.504.504 0 0 1-.028-.079zm2.036.412c-.877.185-1.469.443-1.733.708-.276.276-.587.783-.885 1.465a13.748 13.748 0 0 0-.748 2.295 12.351 12.351 0 0 0-.339 2.406c-.022.755.062 1.368.243 1.776a.42.42 0 0 0 .426.24c.327-.034.61-.199.929-.502.212-.202.4-.423.615-.674.133-.156.276-.323.44-.504C4.861 9.969 5.978 9.027 8 9.027s3.139.942 3.965 1.855c.164.181.307.348.44.504.214.251.403.472.615.674.318.303.601.468.929.503a.42.42 0 0 0 .426-.241c.18-.408.265-1.02.243-1.776a12.354 12.354 0 0 0-.339-2.406 13.753 13.753 0 0 0-.748-2.295c-.298-.682-.61-1.19-.885-1.465-.264-.265-.856-.523-1.733-.708-.85-.179-1.877-.27-2.913-.27-1.036 0-2.063.091-2.913.27z')
+            symbol#dpad(viewbox='0 0 16 16')
+                path(d='m7.788 2.34-.799 1.278A.25.25 0 0 0 7.201 4h1.598a.25.25 0 0 0 .212-.382l-.799-1.279a.25.25 0 0 0-.424 0Zm0 11.32-.799-1.277A.25.25 0 0 1 7.201 12h1.598a.25.25 0 0 1 .212.383l-.799 1.278a.25.25 0 0 1-.424 0ZM3.617 9.01 2.34 8.213a.25.25 0 0 1 0-.424l1.278-.799A.25.25 0 0 1 4 7.201V8.8a.25.25 0 0 1-.383.212Zm10.043-.798-1.277.799A.25.25 0 0 1 12 8.799V7.2a.25.25 0 0 1 .383-.212l1.278.799a.25.25 0 0 1 0 .424Z')
+                path(d='M6.5 0A1.5 1.5 0 0 0 5 1.5v3a.5.5 0 0 1-.5.5h-3A1.5 1.5 0 0 0 0 6.5v3A1.5 1.5 0 0 0 1.5 11h3a.5.5 0 0 1 .5.5v3A1.5 1.5 0 0 0 6.5 16h3a1.5 1.5 0 0 0 1.5-1.5v-3a.5.5 0 0 1 .5-.5h3A1.5 1.5 0 0 0 16 9.5v-3A1.5 1.5 0 0 0 14.5 5h-3a.5.5 0 0 1-.5-.5v-3A1.5 1.5 0 0 0 9.5 0h-3ZM6 1.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 .5.5v3A1.5 1.5 0 0 0 11.5 6h3a.5.5 0 0 1 .5.5v3a.5.5 0 0 1-.5.5h-3a1.5 1.5 0 0 0-1.5 1.5v3a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-3A1.5 1.5 0 0 0 4.5 10h-3a.5.5 0 0 1-.5-.5v-3a.5.5 0 0 1 .5-.5h3A1.5 1.5 0 0 0 6 4.5v-3Z')
+            symbol#info-circle(viewbox='0 0 16 16')
+                path(d='M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z')
+                path(d='m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z')
+            symbol#reception-0(viewbox='0 0 16 16')
+                path(fill-rule='evenodd' d='M0 13.5a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 0 1h-2a.5.5 0 0 1-.5-.5zm4 0a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 0 1h-2a.5.5 0 0 1-.5-.5zm4 0a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 0 1h-2a.5.5 0 0 1-.5-.5zm4 0a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 0 1h-2a.5.5 0 0 1-.5-.5z')
+            symbol#reception-1(viewbox='0 0 16 16')
+                path(fill-rule='evenodd' d='M0 11.5a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1-.5-.5v-2zm4 2a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 0 1h-2a.5.5 0 0 1-.5-.5zm4 0a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 0 1h-2a.5.5 0 0 1-.5-.5zm4 0a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 0 1h-2a.5.5 0 0 1-.5-.5z')
+            symbol#reception-2(viewbox='0 0 16 16')
+                path(fill-rule='evenodd' d='M0 11.5a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1-.5-.5v-2zm4-3a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 .5.5v5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1-.5-.5v-5zm4 5a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 0 1h-2a.5.5 0 0 1-.5-.5zm4 0a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 0 1h-2a.5.5 0 0 1-.5-.5z')
+            symbol#reception-3(viewbox='0 0 16 16')
+                path(fill-rule='evenodd' d='M0 11.5a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1-.5-.5v-2zm4-3a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 .5.5v5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1-.5-.5v-5zm4-3a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1-.5-.5v-8zm4 8a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 0 1h-2a.5.5 0 0 1-.5-.5z')
+            symbol#reception-4(viewbox='0 0 16 16')
+                path(fill-rule='evenodd' d='M0 11.5a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1-.5-.5v-2zm4-3a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 .5.5v5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1-.5-.5v-5zm4-3a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1-.5-.5v-8zm4-3a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 .5.5v11a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1-.5-.5v-11z')
+            symbol#play-fill(viewbox='0 0 16 16')
+                path(fill-rule='evenodd' d='m11.596 8.697-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393z')
+            symbol#pause-fill(viewbox='0 0 16 16')
+                path(fill-rule='evenodd' d='M5.5 3.5A1.5 1.5 0 0 1 7 5v6a1.5 1.5 0 0 1-3 0V5a1.5 1.5 0 0 1 1.5-1.5zm5 0A1.5 1.5 0 0 1 12 5v6a1.5 1.5 0 0 1-3 0V5a1.5 1.5 0 0 1 1.5-1.5z')
+            symbol#stop-fill(viewbox='0 0 16 16')
+                path(fill-rule='evenodd' d='M5 3.5h6A1.5 1.5 0 0 1 12.5 5v6a1.5 1.5 0 0 1-1.5 1.5H5A1.5 1.5 0 0 1 3.5 11V5A1.5 1.5 0 0 1 5 3.5z')
+            symbol#exlamation-octogon-fill(viewbox='0 0 16 16')
+                path(fill-rule='evenodd' d='M11.46.146A.5.5 0 0 0 11.107 0H4.893a.5.5 0 0 0-.353.146L.146 4.54A.5.5 0 0 0 0 4.893v6.214a.5.5 0 0 0 .146.353l4.394 4.394a.5.5 0 0 0 .353.146h6.214a.5.5 0 0 0 .353-.146l4.394-4.394a.5.5 0 0 0 .146-.353V4.893a.5.5 0 0 0-.146-.353L11.46.146zM8 4c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 4.995A.905.905 0 0 1 8 4zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z')
+            symbol#pin-angle-fill(viewbox='0 0 16 16')
+                path(fill-rule='evenodd' d='M9.828.722a.5.5 0 0 1 .354.146l4.95 4.95a.5.5 0 0 1 0 .707c-.48.48-1.072.588-1.503.588-.177 0-.335-.018-.46-.039l-3.134 3.134a5.927 5.927 0 0 1 .16 1.013c.046.702-.032 1.687-.72 2.375a.5.5 0 0 1-.707 0l-2.829-2.828-3.182 3.182c-.195.195-1.219.902-1.414.707-.195-.195.512-1.22.707-1.414l3.182-3.182-2.828-2.829a.5.5 0 0 1 0-.707c.688-.688 1.673-.767 2.375-.72a5.922 5.922 0 0 1 1.013.16l3.134-3.133a2.772 2.772 0 0 1-.04-.461c0-.43.108-1.022.589-1.503a.5.5 0 0 1 .353-.146z')
+            symbol#geo-alt(viewbox='0 0 16 16')
+                path(d='M12.166 8.94c-.524 1.062-1.234 2.12-1.96 3.07A31.493 31.493 0 0 1 8 14.58a31.481 31.481 0 0 1-2.206-2.57c-.726-.95-1.436-2.008-1.96-3.07C3.304 7.867 3 6.862 3 6a5 5 0 0 1 10 0c0 .862-.305 1.867-.834 2.94zM8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10z')
+                path(d='M8 8a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm0 1a3 3 0 1 0 0-6 3 3 0 0 0 0 6z')
+            symbol#x-circle(viewbox='0 0 16 16')
+                path(d='M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z')
+                path(fill-rule='evenodd' d='M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z')
+            symbol#pentagon(viewbox='0 0 16 16')
+                path(d='M7.685 1.545a.5.5 0 0 1 .63 0l6.263 5.088a.5.5 0 0 1 .161.539l-2.362 7.479a.5.5 0 0 1-.476.349H4.099a.5.5 0 0 1-.476-.35L1.26 7.173a.5.5 0 0 1 .161-.54l6.263-5.087Zm8.213 5.28a.5.5 0 0 0-.162-.54L8.316.257a.5.5 0 0 0-.631 0L.264 6.286a.5.5 0 0 0-.162.538l2.788 8.827a.5.5 0 0 0 .476.349h9.268a.5.5 0 0 0 .476-.35l2.788-8.826Z')
+            symbol#arrow-bar-up(viewbox='0 0 16 16')
+                path(fill-rule='evenodd' d='M8 10a.5.5 0 0 0 .5-.5V3.707l2.146 2.147a.5.5 0 0 0 .708-.708l-3-3a.5.5 0 0 0-.708 0l-3 3a.5.5 0 1 0 .708.708L7.5 3.707V9.5a.5.5 0 0 0 .5.5zm-7 2.5a.5.5 0 0 1 .5-.5h13a.5.5 0 0 1 0 1h-13a.5.5 0 0 1-.5-.5z')
+            symbol#arrow-up(viewbox='0 0 16 16')
+                path(fill-rule='evenodd' d='M8 15a.5.5 0 0 0 .5-.5V2.707l3.146 3.147a.5.5 0 0 0 .708-.708l-4-4a.5.5 0 0 0-.708 0l-4 4a.5.5 0 1 0 .708.708L7.5 2.707V14.5a.5.5 0 0 0 .5.5z')
+            symbol#arrow-down(viewbox='0 0 16 16')
+                path(fill-rule='evenodd' d='M8 1a.5.5 0 0 1 .5.5v11.793l3.146-3.147a.5.5 0 0 1 .708.708l-4 4a.5.5 0 0 1-.708 0l-4-4a.5.5 0 0 1 .708-.708L7.5 13.293V1.5A.5.5 0 0 1 8 1z')
+            symbol#arrow-90deg-down(viewbox='0 0 16 16')
+                path(fill-rule='evenodd' d='M4.854 14.854a.5.5 0 0 1-.708 0l-4-4a.5.5 0 0 1 .708-.708L4 13.293V3.5A2.5 2.5 0 0 1 6.5 1h8a.5.5 0 0 1 0 1h-8A1.5 1.5 0 0 0 5 3.5v9.793l3.146-3.147a.5.5 0 0 1 .708.708l-4 4z')
+            symbol#arrows-expand(viewbox='0 0 16 16')
+                path(fill-rule='evenodd' d='M1 8a.5.5 0 0 1 .5-.5h13a.5.5 0 0 1 0 1h-13A.5.5 0 0 1 1 8zM7.646.146a.5.5 0 0 1 .708 0l2 2a.5.5 0 0 1-.708.708L8.5 1.707V5.5a.5.5 0 0 1-1 0V1.707L6.354 2.854a.5.5 0 1 1-.708-.708l2-2zM8 10a.5.5 0 0 1 .5.5v3.793l1.146-1.147a.5.5 0 0 1 .708.708l-2 2a.5.5 0 0 1-.708 0l-2-2a.5.5 0 0 1 .708-.708L7.5 14.293V10.5A.5.5 0 0 1 8 10z')
+            symbol#arrows-move(viewbox='0 0 16 16')
+                path(fill-rule='evenodd' d='M7.646.146a.5.5 0 0 1 .708 0l2 2a.5.5 0 0 1-.708.708L8.5 1.707V5.5a.5.5 0 0 1-1 0V1.707L6.354 2.854a.5.5 0 1 1-.708-.708l2-2zM8 10a.5.5 0 0 1 .5.5v3.793l1.146-1.147a.5.5 0 0 1 .708.708l-2 2a.5.5 0 0 1-.708 0l-2-2a.5.5 0 0 1 .708-.708L7.5 14.293V10.5A.5.5 0 0 1 8 10zM.146 8.354a.5.5 0 0 1 0-.708l2-2a.5.5 0 1 1 .708.708L1.707 7.5H5.5a.5.5 0 0 1 0 1H1.707l1.147 1.146a.5.5 0 0 1-.708.708l-2-2zM10 8a.5.5 0 0 1 .5-.5h3.793l-1.147-1.146a.5.5 0 0 1 .708-.708l2 2a.5.5 0 0 1 0 .708l-2 2a.5.5 0 0 1-.708-.708L14.293 8.5H10.5A.5.5 0 0 1 10 8z')
+            symbol#x(viewbox='0 0 16 16')
+                path(d='M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z')
+            symbol#grip-horizontal(viewbox='0 0 16 16')
+                path(d='M2 8a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm0-3a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm3 3a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm0-3a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm3 3a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm0-3a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm3 3a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm0-3a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm3 3a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm0-3a1 1 0 1 1 0 2 1 1 0 0 1 0-2z')
+            symbol#trash3(viewbox='0 0 16 16')
+                path(d='M6.5 1h3a.5.5 0 0 1 .5.5v1H6v-1a.5.5 0 0 1 .5-.5ZM11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3A1.5 1.5 0 0 0 5 1.5v1H2.506a.58.58 0 0 0-.01 0H1.5a.5.5 0 0 0 0 1h.538l.853 10.66A2 2 0 0 0 4.885 16h6.23a2 2 0 0 0 1.994-1.84l.853-10.66h.538a.5.5 0 0 0 0-1h-.995a.59.59 0 0 0-.01 0H11Zm1.958 1-.846 10.58a1 1 0 0 1-.997.92h-6.23a1 1 0 0 1-.997-.92L3.042 3.5h9.916Zm-7.487 1a.5.5 0 0 1 .528.47l.5 8.5a.5.5 0 0 1-.998.06L5 5.03a.5.5 0 0 1 .47-.53Zm5.058 0a.5.5 0 0 1 .47.53l-.5 8.5a.5.5 0 1 1-.998-.06l.5-8.5a.5.5 0 0 1 .528-.47ZM8 4.5a.5.5 0 0 1 .5.5v8.5a.5.5 0 0 1-1 0V5a.5.5 0 0 1 .5-.5Z')
+            symbol#check-circle(viewbox='0 0 16 16')
+                path(d='M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z')
+                path(d='M10.97 4.97a.235.235 0 0 0-.02.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-1.071-1.05z')
+            symbol#arrow-repeat(viewbox='0 0 16 16')
+                path(d='M11.534 7h3.932a.25.25 0 0 1 .192.41l-1.966 2.36a.25.25 0 0 1-.384 0l-1.966-2.36a.25.25 0 0 1 .192-.41zm-11 2h3.932a.25.25 0 0 0 .192-.41L2.692 6.23a.25.25 0 0 0-.384 0L.342 8.59A.25.25 0 0 0 .534 9z')
+                path(fill-rule='evenodd' d='M8 3c-1.552 0-2.94.707-3.857 1.818a.5.5 0 1 1-.771-.636A6.002 6.002 0 0 1 13.917 7H12.9A5.002 5.002 0 0 0 8 3zM3.1 9a5.002 5.002 0 0 0 8.757 2.182.5.5 0 1 1 .771.636A6.002 6.002 0 0 1 2.083 9H3.1z')
+            symbol#arrow-down-up(viewbox='0 0 16 16')
+                path(fill-rule='evenodd' d='M11.5 15a.5.5 0 0 0 .5-.5V2.707l3.146 3.147a.5.5 0 0 0 .708-.708l-4-4a.5.5 0 0 0-.708 0l-4 4a.5.5 0 1 0 .708.708L11 2.707V14.5a.5.5 0 0 0 .5.5zm-7-14a.5.5 0 0 1 .5.5v11.793l3.146-3.147a.5.5 0 0 1 .708.708l-4 4a.5.5 0 0 1-.708 0l-4-4a.5.5 0 0 1 .708-.708L4 13.293V1.5a.5.5 0 0 1 .5-.5z')
+            symbol#repeat(viewbox='0 0 16 16')
+                path(d='M11 5.466V4H5a4 4 0 0 0-3.584 5.777.5.5 0 1 1-.896.446A5 5 0 0 1 5 3h6V1.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384l-2.36 1.966a.25.25 0 0 1-.41-.192Zm3.81.086a.5.5 0 0 1 .67.225A5 5 0 0 1 11 13H5v1.466a.25.25 0 0 1-.41.192l-2.36-1.966a.25.25 0 0 1 0-.384l2.36-1.966a.25.25 0 0 1 .41.192V12h6a4 4 0 0 0 3.585-5.777.5.5 0 0 1 .225-.67Z')
+            symbol#camera-video(viewbox='0 0 16 16')
+                path(fill-rule='evenodd' d='M0 5a2 2 0 0 1 2-2h7.5a2 2 0 0 1 1.983 1.738l3.11-1.382A1 1 0 0 1 16 4.269v7.462a1 1 0 0 1-1.406.913l-3.111-1.382A2 2 0 0 1 9.5 13H2a2 2 0 0 1-2-2V5zm11.5 5.175 3.5 1.556V4.269l-3.5 1.556v4.35zM2 4a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h7.5a1 1 0 0 0 1-1V5a1 1 0 0 0-1-1H2z')
+            symbol#fullscreen(viewbox='0 0 16 16')
+                path(d='M1.5 1a.5.5 0 0 0-.5.5v4a.5.5 0 0 1-1 0v-4A1.5 1.5 0 0 1 1.5 0h4a.5.5 0 0 1 0 1h-4zM10 .5a.5.5 0 0 1 .5-.5h4A1.5 1.5 0 0 1 16 1.5v4a.5.5 0 0 1-1 0v-4a.5.5 0 0 0-.5-.5h-4a.5.5 0 0 1-.5-.5zM.5 10a.5.5 0 0 1 .5.5v4a.5.5 0 0 0 .5.5h4a.5.5 0 0 1 0 1h-4A1.5 1.5 0 0 1 0 14.5v-4a.5.5 0 0 1 .5-.5zm15 0a.5.5 0 0 1 .5.5v4a1.5 1.5 0 0 1-1.5 1.5h-4a.5.5 0 0 1 0-1h4a.5.5 0 0 0 .5-.5v-4a.5.5 0 0 1 .5-.5z')
+            symbol#fullscreen-exit(viewbox='0 0 16 16')
+                path(d='M5.5 0a.5.5 0 0 1 .5.5v4A1.5 1.5 0 0 1 4.5 6h-4a.5.5 0 0 1 0-1h4a.5.5 0 0 0 .5-.5v-4a.5.5 0 0 1 .5-.5zm5 0a.5.5 0 0 1 .5.5v4a.5.5 0 0 0 .5.5h4a.5.5 0 0 1 0 1h-4A1.5 1.5 0 0 1 10 4.5v-4a.5.5 0 0 1 .5-.5zM0 10.5a.5.5 0 0 1 .5-.5h4A1.5 1.5 0 0 1 6 11.5v4a.5.5 0 0 1-1 0v-4a.5.5 0 0 0-.5-.5h-4a.5.5 0 0 1-.5-.5zm10 1a1.5 1.5 0 0 1 1.5-1.5h4a.5.5 0 0 1 0 1h-4a.5.5 0 0 0-.5.5v4a.5.5 0 0 1-1 0v-4z')
+            symbol#volume-up(viewbox='0 0 16 16')
+                path(d='M11.536 14.01A8.473 8.473 0 0 0 14.026 8a8.473 8.473 0 0 0-2.49-6.01l-.708.707A7.476 7.476 0 0 1 13.025 8c0 2.071-.84 3.946-2.197 5.303l.708.707z')
+                path(d='M10.121 12.596A6.48 6.48 0 0 0 12.025 8a6.48 6.48 0 0 0-1.904-4.596l-.707.707A5.483 5.483 0 0 1 11.025 8a5.483 5.483 0 0 1-1.61 3.89l.706.706z')
+                path(d='M10.025 8a4.486 4.486 0 0 1-1.318 3.182L8 10.475A3.489 3.489 0 0 0 9.025 8c0-.966-.392-1.841-1.025-2.475l.707-.707A4.486 4.486 0 0 1 10.025 8zM7 4a.5.5 0 0 0-.812-.39L3.825 5.5H1.5A.5.5 0 0 0 1 6v4a.5.5 0 0 0 .5.5h2.325l2.363 1.89A.5.5 0 0 0 7 12V4zM4.312 6.39 6 5.04v5.92L4.312 9.61A.5.5 0 0 0 4 9.5H2v-3h2a.5.5 0 0 0 .312-.11z')
+            symbol#volume-mute(viewbox='0 0 16 16')
+                path(d='M6.717 3.55A.5.5 0 0 1 7 4v8a.5.5 0 0 1-.812.39L3.825 10.5H1.5A.5.5 0 0 1 1 10V6a.5.5 0 0 1 .5-.5h2.325l2.363-1.89a.5.5 0 0 1 .529-.06zM6 5.04 4.312 6.39A.5.5 0 0 1 4 6.5H2v3h2a.5.5 0 0 1 .312.11L6 10.96V5.04zm7.854.606a.5.5 0 0 1 0 .708L12.207 8l1.647 1.646a.5.5 0 0 1-.708.708L11.5 8.707l-1.646 1.647a.5.5 0 0 1-.708-.708L10.793 8 9.146 6.354a.5.5 0 1 1 .708-.708L11.5 7.293l1.646-1.647a.5.5 0 0 1 .708 0z')
+            symbol#waypoint-dot(viewbox='0 0 24 24')
+                circle(fill='#ffffff' stroke='#cccccc' stroke-width='1' cx='12' cy='12' r='10')
+                circle(fill=`${color}` cx='12' cy='12' r='6')
+            symbol#vertex-dot(viewbox='0 0 24 24')
+                circle(fill='#ffffff' stroke='#cccccc' stroke-width='1' cx='12' cy='12' r='10')
+                circle(fill='#0d6efd' cx='12' cy='12' r='6')
+            symbol#anafi(viewbox='-27 -27 54 54')
+                path(d='M 4 -12 C 8 -12 8 -12 12 -16 L 14 -18 A 2 2 90 0 1 18 -14 L 16 -12 C 12 -8 12 -8 12 -4 L 12 4 C 12 8 12 8 16 12 L 18 14 A 2 2 90 0 1 14 18 L 12 16 C 8 12 8 12 4 12 L -4 12 C -8 12 -8 12 -12 16 L -14 18 A 2 2 90 0 1 -18 14 L -16 12 C -12 8 -12 8 -12 4 L -12 -4 C -12 -8 -12 -8 -16 -12 L -18 -14 A 2 2 90 0 1 -14 -18 L -12 -16 C -8 -12 -8 -12 -4 -12 Z', stroke='#606060', fill=`${color}`, stroke-width='1')
+                rect(x='-4', y='-12', width='8', height='6', stroke='#606060', fill='#D9D9D9', stroke-width='1')
+                rect(x='-3', y='-15', width='6', height='4', stroke='#000000', fill=`${color}`, stroke-width='1')
+                circle(cx='-16', cy='-16', r='10', stroke='#606060', fill='#888888', fill-opacity='.5', stroke-width='1')
+                circle(cx='16', cy='-16', r='10', stroke='#606060', fill='#888888', fill-opacity='.5', stroke-width='1')
+                circle(cx='16', cy='16', r='10', stroke='#606060', fill='#888888', fill-opacity='.5', stroke-width='1')
+                circle(cx='-16', cy='16', r='10', stroke='#606060', fill='#888888', fill-opacity='.5', stroke-width='1')
+                circle(cx='0' cy='0' r='3' stroke='#606060' fill='#3CC800' stroke-width='1')
+            symbol#husky(viewbox='-27 -27 54 54')
+                rect(x='-16', y='-24', width='32', height='48', stroke='#606060', fill=`${color}`, stroke-width='1')
+                rect(x='-16', y='-24', width='32', height='8', stroke='#606060', fill='#ffffff', fill-opacity='0.4', stroke-width='1')
+                rect(x='-16', y='16', width='32', height='8', stroke='#606060', fill='#000000', fill-opacity='0.3', stroke-width='1')
+                rect(x='-26', y='-24', rx='2', ry='2', width='10', height='18', stroke='#606060', fill='#333333', stroke-width='1')
+                rect(x='-26', y='6', width='10', height='18', rx='2', ry='2', stroke='#606060', fill='#333333', stroke-width='1')
+                rect(x='16', y='-24', width='10', height='18', rx='2', ry='2', stroke='#606060', fill='#333333', stroke-width='1')
+                rect(x='16', y='6', width='10', height='18', rx='2', ry='2', stroke='#606060', fill='#333333', stroke-width='1')
+                circle(cx='0' cy='0' r='3' stroke='#606060' fill='#3CC800' stroke-width='1')
+            symbol#warthog(viewbox='-27 -27 54 54')
+                rect(x='-25' y='-26' rx='2' ry='2' width='10' height='20' stroke='#606060' fill='#333333' stroke-width='1')
+                rect(x='15' y='-26' rx='2' ry='2' width='10' height='20' stroke='#606060' fill='#333333' stroke-width='1')
+                rect(x='15' y='6' rx='2' ry='2' width='10' height='20' stroke='#606060' fill='#333333' stroke-width='1')
+                rect(x='-25' y='6' rx='2' ry='2' width='10' height='20' stroke='#606060' fill='#333333' stroke-width='1')
+                rect(x='-24' y='-24' width='48' height='48' stroke='#606060' fill=`${color}` stroke-width='1')
+                rect(x='-24' y='-24' width='48' height='8' stroke='#606060' fill='#ffffff' fill-opacity='0.4' stroke-width='1')
+                rect(x='-24' y='16' width='48' height='8' stroke='#606060' fill='#000000' fill-opacity='0.3' stroke-width='1')
+                rect(x='-15' y='-24' width='30' height='48' stroke='#606060' fill='#444444' stroke-width='1')
+                circle(cx='0' cy='0' r='3' stroke='#606060' fill='#3CC800' stroke-width='1')
+            
+            div.container-fluid.d-flex.p-0
+                nav.d-flex.flex-nowrap(id="nav")
+                    div.d-flex.flex-column.flex-shrink-0.bg-light(style="width: 4.5rem;")
+                        a.d-block.p-3.link-dark.text-decoration-none.text-center(href=`/robot?robot_class=${robot_class}&name=${name}&address=${address}&port=${port}&color=%23${color.slice(1)}` data-bs-toggle="tooltip" data-bs-placement="right" title="Mirador")
+                            svg.pe-none(width="40" height="40")
+                                use(xlink:href="#mirador")
+                            span.visually-hidden Mirador
+                        ul.nav.nav-pills.nav-flush.flex-column.mb-auto.text-center(role="tablist")
+                            li.nav-item(role="presentation")
+                                span(data-bs-toggle="tooltip" data-bs-placement="right" title="Dashboard")
+                                    a.nav-link.py-3.border-top.border-bottom.rounded-0.active(href="#mode-dashboard" id="dashboard" aria-current="page" data-bs-toggle="pill" type="button" role="tab" data-bs-target="#mode-dashboard" aria-controls="mode-dashboard" aria-selected="true")
+                                        svg.bi.pe-none(width="26" height="26" role="img" aria-label="Dashboard")
+                                            use(xlink:href="#speedometer")
+                            li.nav-item(role="presentation")
+                                span(data-bs-toggle="tooltip" data-bs-placement="right" title="Guide")
+                                    a.nav-link.py-3.border-bottom.rounded-0(href='#mode-guide' id="guide" data-bs-toggle="pill" type="button" role="tab" data-bs-target="#mode-guide" aria-controls="mode-guide" aria-selected="false")
+                                        svg.bi.pe-none(width='26' height='26' role='img' aria-label='Guide')
+                                            use(xlink:href='#signpost')
+                            li.nav-item(role="presentation")
+                                span(data-bs-toggle="tooltip" data-bs-placement="right" title="Route")
+                                    a.nav-link.py-3.border-bottom.rounded-0(href='#mode-route' id="route" data-bs-toggle="pill" type="button" role="tab" data-bs-target="#mode-route" aria-controls="mode-route" aria-selected="false")
+                                        svg.bi.pe-none(width='26' height='26' role='img' aria-label='Route')
+                                            use(xlink:href='#geo-alt')
+                            li.nav-item(role="presentation")
+                                span(data-bs-toggle="tooltip" data-bs-placement="right" title="Exploration")
+                                    a.nav-link.py-3.border-bottom.rounded-0(href='#mode-exploration' id="exploration" data-bs-toggle="pill" type="button" role="tab" data-bs-target="#mode-exploration" aria-controls="mode-exploration" aria-selected="false")
+                                        svg.bi.pe-none(width='26' height='26' role='img' aria-label='Exploration')
+                                            use(xlink:href='#map')
+                            li.nav-item(role="presentation")
+                                span(data-bs-toggle="tooltip" data-bs-placement="right" title="Control")
+                                    a.nav-link.py-3.border-bottom.rounded-0(href='#mode-control' id="control" data-bs-toggle="pill" type="button" role="tab" data-bs-target="#mode-control" aria-controls="mode-control" aria-selected="false")
+                                        svg.bi.pe-none(width='26' height='26' role='img' aria-label='Control')
+                                            use(xlink:href='#dpad')
+                        div.dropdown.border-top
+                            a.d-flex.align-items-center.justify-content-center.p-3.link-dark.text-decoration-none.dropdown-toggle(href='#' id="dropdownRobot" data-bs-toggle='dropdown' aria-expanded='false')
+                                svg.bi(width='24' height='24' role='img')
+                                    use(xlink:href=`#${robot_class}`)
+                            ul.dropdown-menu.text-small.shadow(id='dropdownMenuRobot' aria-labelledby='dropdownRobot' style='')
+                                li
+                                    a.dropdown-item(data-bs-toggle='offcanvas' data-bs-target='#offcanvasSettings' aria-controls='offcanvasSettings') Settings
+                                li
+                                    a.dropdown-item(href='https://github.com/julesberhault/mirador' target='_blank') About Mirador
+                                li
+                                    hr.dropdown-divider
+                                li
+                                    a.dropdown-item(href='/login' target='_blank') Connect to a new robot
+                                li
+                                    a.dropdown-item(data-bs-toggle='modal' data-bs-target='#disconnectModal') Disconnect
+                main.d-flex.flex-nowrap.grow-1
+                    div(id="leafletmap")
+                    div.rounded-4.shadow(id="omnibox")
+                        div.container.rounded-4.bg-white.d-flex.py-2.align-items-center(id="topbar")
+                            div.flex-grow-1.gap-2.me-2
+                                svg.rise.me-2(id="signal" width="22" height="22" role="img" aria-label="signal" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Signal")
+                                    use(xlink:href="#reception-0")
+                                svg.rise.me-2(id="is-running" width="22" height="22" role="img" aria-label="is-running" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Operating" display="none")
+                                    use(xlink:href="#cursor-fill")
+                                svg.rise.me-2(id="e-stop" width="22" height="22" role="img" aria-label="e-stop" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Emergency Stop" display="none")
+                                    use(xlink:href="#exlamation-octogon-fill")
+                                div.uav.badge.bg-dark(id="flight-status" aria-label="flight-status" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Flight Status")
+                            b.me-2=`${name}`
+                            div.progress.border.border-2.border-dark.position-relative.bg-light(id="battery-charge" style="height: 20px; width: 40px"  aria-label="battery-charge" data-bs-toggle="tooltip" data-bs-placement="bottom" title="0%")
+                                div.progress-bar.border.border-1.border-light.rounded-1.bg-dark(id="battery-charge-bar" role="progressbar" aria-valuenow="0" style="width: 0%;" aria-valuemin="0" aria-valuemax="100")
+                            svg(xmlns='http://www.w3.org/2000/svg' width='3' height='10' style='margin: 0 0 0 1px;')
+                                circle(cx='-2' cy='5' r='5' fill='#212529')
+                        div.container.overflow-auto.collapse.show(id='omnibox-content')
+                            div.tab-content.mb-1
+                                // Dashboard
+                                div.tab-pane.fade.show.active(id="mode-dashboard" role="tabpanel" aria-labelledby="dashboard-tab")
+                                    div.text-center.border-bottom.py-2
+                                        svg.bi.me-2(width='24' height='24' role='img')
+                                            use(xlink:href='#speedometer')
+                                        span.h2 Dashboard
+                                    div.d-grid.gap-2.pt-2
+                                        ul.list-group.border-bottom-0(id='missionList')
+                                        button(id='playPauseMissionBtn' type='button').btn.btn-primary
+                                            svg.bi(width='16' height='16' role='img')
+                                                use(xlink:href='#play-fill')
+                                            |   Launch mission
+                                        button(id='stopMissionBtn' type='button').btn.btn-danger.disabled
+                                            svg.bi(width='16' height='16' role='img')
+                                                use(xlink:href='#stop-fill')
+                                            |   Stop mission
+                                // Guide
+                                div.tab-pane.fade(id="mode-guide" role="tabpanel" aria-labelledby="guide-tab")
+                                    div.text-center.border-bottom.py-2
+                                        svg.bi.me-2(width='24' height='24' role='img')
+                                            use(xlink:href='#signpost')
+                                        span.h2 Guide
+                                    div.d-grid.gap-2.pt-2
+                                        button(id='playPauseMissionBtn' type='button').btn.btn-primary.disabled
+                                            svg.bi(width='16' height='16' role='img')
+                                                use(xlink:href='#pin-angle-fill')
+                                            |   Pinpoint a target
+                                        button(id='stopMissionBtn' type='button').btn.btn-danger.disabled
+                                            svg.bi(width='16' height='16' role='img')
+                                                use(xlink:href='#x-circle')
+                                            |   Cancel
+                                // Route
+                                div.tab-pane.fade(id="mode-route" role="tabpanel" aria-labelledby="route-tab")
+                                    div.text-center.border-bottom.py-2
+                                        svg.bi.me-2(width='24' height='24' role='img')
+                                            use(xlink:href='#geo-alt')
+                                        span.h2 Route
+                                    div.d-grid.pt-2
+                                        button(id='refreshRouteBtn' type='button').btn.btn-secondary.mb-2
+                                            svg.bi(width='16' height='16' role='img')
+                                                use(xlink:href='#arrow-repeat')
+                                            |   Refresh route
+                                        ul.list-group.border-bottom-0(id='waypointList')
+                                        ul.list-group.collapse.multi-collapse.multi-collapse-route(id='addingWpCollapse')
+                                            li.list-group-item.d-flex.justify-content-center
+                                                div.d-flex.gap-2
+                                                    small.text-muted Click on the map to add waypoint
+                                                    button.btn.btn-danger.disabled(type='button' id='clearRouteBtn')
+                                                        svg.bi(width='16' height='16' role='img')
+                                                            use(xlink:href='#trash3')
+                                                        |   Clear
+                                                    button.btn.btn-secondary(type='button' id='stopAddingWpBtn' data-bs-toggle='collapse' data-bs-target='.multi-collapse-route' role='button' aria-expanded='false' aria-controls='addWpCollapse addingWpCollapse')
+                                                        svg.bi(width='16' height='16' role='img')
+                                                            use(xlink:href='#check-circle')
+                                                        |   Finish
+                                        ul.list-group.collapse.multi-collapse.multi-collapse-route.show(id='addWpCollapse')
+                                            li.list-group-item.list-group-item-action.d-flex.justify-content-center(id='addWpBtn' data-bs-toggle='collapse' data-bs-target='.multi-collapse-route' role='button' aria-expanded='false' aria-controls='addWpCollapse addingWpCollapse')
+                                                svg.bi.me-2(width="20" height="20" role="img")
+                                                    use(xlink:href="#geo")
+                                                |   Modify the route
+                                        form.pt-2.uav(onsubmit='return false;')
+                                            div.input-group.align-items-center
+                                                span.input-group-text.pe-5 Flight altitude
+                                                input.form-control(type="text" name="altitudeInput" id="altitudeInput" oninput="this.form.altitudeRange.value=this.value" value="2")
+                                                span.input-group-text m
+                                            div.d-flex.align-items-center.mt-2
+                                                small 0
+                                                input.form-range.mx-2(type="range" name="altitudeRange" min="0" max="30" step="2" id="altitudeRange" oninput="this.form.altitudeInput.value=this.value;" value=2)
+                                                small 30m
+                                        button.btn.btn-primary.pb-2.mt-2.disabled(id='sendRouteBtn' type='button')
+                                            span.spinner-border.spinner-border-sm(role="status" aria-hidden="true")
+                                            |   Loading...
+                                // Exploration
+                                div.tab-pane.fade(id="mode-exploration" role="tabpanel" aria-labelledby="exploration-tab")
+                                    div.text-center.border-bottom.py-2
+                                        svg.bi.me-2(width='24' height='24' role='img')
+                                            use(xlink:href='#map')
+                                        span.h2 Exploration
+                                    div.d-grid.pt-2
+                                        button(id='refreshAreaBtn' type='button').btn.btn-secondary.mb-2
+                                            svg.bi(width='16' height='16' role='img')
+                                                use(xlink:href='#arrow-repeat')
+                                            |   Refresh area
+                                        ul.list-group.border-bottom-0(id='areaList')
+                                        ul.list-group.collapse.multi-collapse.multi-collapse-exploration(id='addingAreaCollapse')
+                                            li.list-group-item.d-flex.justify-content-center
+                                                div.d-flex.gap-2
+                                                    small.text-muted Click on the map to add vertex
+                                                    button.btn.btn-danger.disabled(type='button' id='clearAreaBtn')
+                                                        svg.bi(width='16' height='16' role='img')
+                                                            use(xlink:href='#trash3')
+                                                        |   Clear
+                                                    button.btn.btn-secondary(type='button' id='stopAddingAreaBtn' data-bs-toggle='collapse' data-bs-target='.multi-collapse-exploration' role='button' aria-expanded='false' aria-controls='addAreaCollapse addingAreaCollapse')
+                                                        svg.bi(width='16' height='16' role='img')
+                                                            use(xlink:href='#check-circle')
+                                                        |   Finish
+                                        ul.list-group.collapse.multi-collapse.multi-collapse-exploration.show(id='addAreaCollapse')
+                                            li.list-group-item.list-group-item-action.d-flex.justify-content-center(id='addAreaBtn' data-bs-toggle='collapse' data-bs-target='.multi-collapse-exploration' role='button' aria-expanded='false' aria-controls='addAreaCollapse addingAreaCollapse')
+                                                svg.bi.me-2(width="20" height="20" role="img")
+                                                    use(xlink:href="#pentagon")
+                                                |   Modify the area
+                                        button(id='sendAreaBtn' type='button').btn.btn-primary.pb-2.mt-2.disabled
+                                            span.spinner-border.spinner-border-sm(role="status" aria-hidden="true")
+                                            |   Loading...
+                                // Control
+                                div.tab-pane.fade(id="mode-control" role="tabpanel" aria-labelledby="control-tab")
+                                    div.text-center.border-bottom.py-2
+                                        svg.bi.me-2(width='24' height='24' role='img')
+                                            use(xlink:href='#dpad')
+                                        span.h2 Control
+                                    div.d-grid.gap-2.pt-2
+                                        button.btn.btn-secondary(type='button' data-bs-toggle="modal" data-bs-target="#controlInfoModal")
+                                            svg.bi(width='16' height='16' role='img')
+                                                use(xlink:href='#info-circle')
+                                            |   How to control your robot
+                                        button.btn.btn-primary.uav(id='takeOffBtn' type='button')
+                                            svg.bi(width='16' height='16' role='img')
+                                                use(xlink:href='#arrow-up')
+                                            |   Take off
+                                        button.btn.btn-primary.uav(id='landBtn' type='button')
+                                            svg.bi(width='16' height='16' role='img')
+                                                use(xlink:href='#arrow-down')
+                                            |   Land
+                                        button.btn.btn-primary.uav(id='returnToLaunchBtn' type='button')
+                                            svg.bi(width='16' height='16' role='img')
+                                                use(xlink:href='#arrow-90deg-down')
+                                            |   Return to launch
+                                        div.text-center.uav
+                                            strong Camera elevation angle
+                                            div.d-flex.align-items-center
+                                                small -90°
+                                                input.form-range.mx-2(type="range" name="elevationRange" min="-90" max="90" step="15" id="elevationRange" value=0)
+                                                small +90°
+                                        div.text-center.uav
+                                            strong Camera zoom
+                                            div.d-flex.align-items-center
+                                                small 1×
+                                                input.form-range.mx-2(type="range" name="zoomRange" min="1" max="4" step="1" id="zoomRange" value=1)
+                                                small 4×
+                        a.collapse-bar.d-flex.justify-content-center.py-2.mx-5(data-bs-toggle='collapse' data-bs-target='#omnibox-content' role='button' aria-expanded='false' aria-controls='omnibox-content')
+                            svg(xmlns='http://www.w3.org/2000/svg' width='12rem' height='8px')
+                                rect(rx='4' ry='4' width='100%' height='8' fill='#adb5bd' fill-opacity='.8')
+                    div.bg-black.rounded-4.shadow.overflow-hidden(id='stream-display-container')
+                        video(id='stream-display' autoplay muted playsinline)
+                        //img.position-absolute.top-50.translate-middle-y(style='display: block; max-height: 100%; width: 100%;' alt='Stream display' src='http://11.0.0.11:8888/stream?topic=/zed_node/rgb/image_rect_color')
+                        a.position-absolute.top-0.end-0.rounded.p-3.me-1(id='changeVideoSourceBtn' role='button')
+                            svg.bi.pe-none.text-light(width='22' height='22' role='img')
+                                use(xlink:href='#repeat')
+                        a.position-absolute.bottom-0.start-0.rounded.p-3.ms-1(id='fullScreenStreamDisplayBtn' role='button')
+                            svg.bi.pe-none.text-light(width='22' height='22' role='img')
+                                use(xlink:href='#fullscreen')
+                        a.position-absolute.bottom-0.end-0.rounded.p-3.me-1(id='enableAudioBtn' role='button')
+                            svg.bi.pe-none.text-light(width='22' height='22' role='img')
+                                use(xlink:href='#volume-mute')
+                    div.joystick-left(id='joystick-left')
+                    div.joystick-right(id='joystick-right')
+
+        // Settings
+        div.offcanvas.offcanvas-start(data-bs-scroll='false' tabindex='-1' aria-labelledby='offcanvasLabelSettings' id="offcanvasSettings")
+            div.offcanvas-header.border-bottom
+                h2.offcanvas-title(id="offcanvasLabelSettings") Settings
+                button.btn-close(type='button' data-bs-dismiss='offcanvas' aria-label='Close')
+            div.offcanvas-body
+                div.text-center.mb-2
+                    svg(width="128" height="128" role="img")
+                        use(xlink:href="#" + `${robot_class}`)
+                h1.text-center.mb-0=`${name}`
+                h4.text-center.text-muted.text-capitalize.mb-4=`${robot_class}`
+                ul.list-group
+                    li.list-group-item.d-flex.justify-content-between.align-items-center
+                        |   Class
+                        span.text-muted.text-capitalize=`${robot_class}`
+                    li.list-group-item.d-flex.justify-content-between.align-items-center
+                        |   Name
+                        span.text-muted=`${name}`
+                    li.list-group-item.d-flex.justify-content-between.align-items-center
+                        |   Address
+                        span.text-muted=`${address}`
+                    li.list-group-item.d-flex.justify-content-between.align-items-center
+                        |   Port
+                        span.text-muted=`${port}`
+                hr
+                div.form-check.form-switch
+                    input.form-check-input(id='fullScreenStreamDisplaySwitch' type='checkbox' role='switch')
+                    label.form-check-label(for='fullScreenStreamDisplaySwitch') Fullscreen stream display
+        
+        // Modals
+        div.modal(tabindex='-1' role='dialog' aria-labelledby='controlInfoModalLabel' aria-hidden='true' id="controlInfoModal")
+            div.modal-dialog.modal-dialog-centered(role='document')
+                div.modal-content.rounded-4.shadow
+                    div.modal-body.p-5
+                        h2.fw-bold.mb-0 How to control your robot
+                        div.ugv
+                            ul.d-grid.gap-4.my-4.list-unstyled
+                                li.d-flex.gap-4
+                                    svg.bi.text-muted.flex-shrink-0(width='48' height='48')
+                                        use(xlink:href='#arrows-move')
+                                    div
+                                        h5.mb-0 Left joystick to move
+                                        |   Use the left joystick to move the robot.
+                        div.uav
+                            ul.d-grid.gap-4.my-4.list-unstyled
+                                li.d-flex.gap-4
+                                    svg.bi.text-muted.flex-shrink-0(width='48' height='48')
+                                        use(xlink:href='#arrows-move')
+                                    div
+                                        h5.mb-0 Right joystick to move
+                                        |   Use the right joystick to move the robot horizontally.
+                                li.d-flex.gap-4
+                                    svg.bi.text-warning.flex-shrink-0(width='48' height='48')
+                                        use(xlink:href='#arrows-expand')
+                                    div
+                                        h5.mb-0 Left joystick to change altitude
+                                        |   Use the vertical axis of the left joystick to go up or down.
+                                li.d-flex.gap-4
+                                    svg.bi.text-primary.flex-shrink-0(width='48' height='48')
+                                        use(xlink:href='#arrow-repeat')
+                                    div
+                                        h5.mb-0 Left joystick to rotate
+                                        |   Use the horizontal axis of the left joystick to rotate.
+                                li.d-flex.gap-4
+                                    svg.bi.text-success.flex-shrink-0(width='48' height='48')
+                                        use(xlink:href='#camera-video')
+                                    div
+                                        h5.mb-0 Camera elevation
+                                        |   Use the slider to change the elevation of the embedded camera.
+                        button.btn.btn-lg.btn-primary.w-100(type='button' data-bs-dismiss='modal') Great, thanks!
+
+        div.modal.modal-alert(tabindex='-1' role='dialog' aria-labelledby='disconnectModalLabel' aria-hidden='true' id="disconnectModal")
+            div.modal-dialog.modal-dialog-centered(role='document')
+                div.modal-content.rounded-4.shadow
+                    div.modal-body.p-4.text-center
+                        h5.mb-0 You are about to disconnect
+                        p.mb-0 Are you sure you want to quit ?
+                    div.modal-footer.flex-nowrap.p-0
+                        a.btn.btn-link.fs-6.text-decoration-none.col-6.m-0.rounded-0.border-end(href=`/logout?robot_class=${robot_class}&name=${name}&address=${address}&port=${port}&color=%23${color.slice(1)}` role='button')
+                            strong Disconnect
+                        button.btn.btn-link.fs-6.text-decoration-none.col-6.m-0.rounded-0(type='button' data-bs-dismiss='modal') Cancel
+        
+        // Toasts
+        div.toast-container.position-fixed.bottom-0.end-0.p-2
+
+        script(src=("/public/js/miradorlib.js"))
+        script(src=("/public/js/robot.js"), robot_class=robot_class, name=name, address=address, port=port, color=color)
