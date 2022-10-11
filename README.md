@@ -27,7 +27,7 @@ node mirador
 
 Run [**Mirador driver**](https://github.com/julesberhault/mirador_driver) first.
 
-This package is designed to run with a second package named [mirador_driver](https://github.com/julesberhault/mirador_driver). You need to install and run this driver to interface with ROS environment.
+This package is designed to run with a second package named [**mirador_driver**](https://github.com/julesberhault/mirador_driver). You need to install and run this driver to interface with ROS environment.
 
 ## Source details
 
