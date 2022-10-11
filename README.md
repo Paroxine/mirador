@@ -6,6 +6,12 @@ Mirador HMI, a useful web page interface designed manage and control robots outd
 
 ## Use
 
+### Clone this repository
+
+```bash
+clone https://github.com/julesberhault/mirador.git
+```
+
 ### Install NodeJS
 
 Follow this [link](https://nodejs.dev/en/learn/how-to-install-nodejs/) to install NodeJS on your platform
