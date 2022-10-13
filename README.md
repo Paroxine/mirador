@@ -9,7 +9,7 @@ Mirador HMI, a useful web page interface designed manage and control robots outd
 ### Clone this repository
 
 ```bash
-clone https://github.com/julesberhault/mirador.git
+git clone https://github.com/julesberhault/mirador.git
 ```
 
 ### Install NodeJS
