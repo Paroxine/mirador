@@ -254,16 +254,27 @@
         
     }
 
-    toast('Connected to ' + robot.name + '');
+    var robotMarker;
 
-    var robotMarker = new L.Marker([0, 0], {icon: getRobotIcon(robot.robot_class, robot.color), draggable: true});
-    robotMarker.addTo(map).bindPopup('<strong>' + robot.name + '</strong>' + ((robot.job !== undefined) ? (' ' + robot.job) : ' Idle'));
+    function updatePose(pose) {
+        if (pose.latitude !== .0 && pose.longitude !== .0) {
+            if (robotMarker === undefined) {
+                robotMarker = new L.Marker([pose.latitude, pose.longitude], {icon: getRobotIcon(robot.robot_class, robot.color), rotationOrigin: "center center"});
+                robotMarker.addTo(map).bindPopup('<strong>' + robot.name + '</strong>' + ((robot.job !== undefined) ? (' ' + robot.job) : ' Idle'));
+                map.setView(robotMarker.getLatLng(), 12);
+            }
+            else {
+                robot.position.latitude = pose.latitude;
+                robot.position.longitude = pose.longitude;
+                robot.position.altitude = pose.altitude;
+                robot.position.heading = pose.heading;
+                robotMarker.setLatLng([pose.latitude, pose.longitude]);
+                robotMarker.setRotationAngle(pose.heading);
+                socket.emit("robot", robot.position, robot.job);
+            }
+        }
 
-    robotMarker.on('moveend', function (event) {
-        robot.position.latitude = event.target._latlng.lat;
-        robot.position.longitude = event.target._latlng.lng;
-        socket.emit("robot", robot.position, robot.job);
-    });
+    }
 
     // SIBLINGS MANAGEMENT
 
@@ -282,13 +293,14 @@
                     siblings[id].position = newSiblings[id].position;
                     //sibling.job = newSiblings[id].job;
                     siblings[id].marker.setLatLng([siblings[id].position.latitude, siblings[id].position.longitude, siblings[id].position.altitude])
+                    .setRotationAngle(siblings[id].position.heading)
                     .bindPopup('<strong>' + siblings[id].name + '</strong>' + ((siblings[id].job !== null) ? (' ' + siblings[id].job) : ' Idle'));
 
                 }
                 else {
                     siblings[id] = {...newSiblings[id]};
                     let siblingIcon = getRobotIcon(siblings[id].robot_class, siblings[id].color);
-                    siblings[id].marker = new L.Marker([siblings[id].position.latitude, siblings[id].position.longitude], {icon: siblingIcon});
+                    siblings[id].marker = new L.Marker([siblings[id].position.latitude, siblings[id].position.longitude], {icon: siblingIcon, rotationAngle: siblings[id].position.heading, rotationOrigin: "center center"});
                     siblings[id].marker.addTo(map)
                     .bindPopup('<strong>' + siblings[id].name + '</strong>' + ((siblings[id].job !== null) ? (' ' + siblings[id].job) : ' Idle'));
                 }
@@ -300,13 +312,30 @@
 
     robot.missions = new Missions();
 
-    new Sortable.create(document.getElementById('missionList'), {
+    new Sortable(document.getElementById('savedMissionList'), {
         onEnd: function (event) {
             robot.missions.swap(event.oldIndex, event.newIndex);
             navigator.vibrate(HAPTIC_VIBRATION_TIME);
         },
         handle: '.handle-mission',
         animation: 150,
+    });
+
+    $('#pushNextMissionBtn').on('click', function () {
+        navigator.vibrate(HAPTIC_VIBRATION_TIME);
+        publishMission(robot.missions.missions[0]);
+        robot.missions.remove(robot.missions.missions[0].id);
+
+    });
+
+    $('#launchMissionBtn').on('click', function () {
+        navigator.vibrate(HAPTIC_VIBRATION_TIME);
+        publishLaunch();
+    });
+
+    $('#stopMissionBtn').on('click', function () {
+        navigator.vibrate(HAPTIC_VIBRATION_TIME);
+        publishAbort();
     });
 
     // GUIDE
@@ -326,7 +355,7 @@
         robot.route.points.forEach(point => {
             point.marker.dragging.enable();
         });
-    })
+    });
     addingWpCollapse.addEventListener('hide.bs.collapse', event => {
         if (robot.route.length !== 0){
             document.getElementById('sendRouteBtn').classList.remove('disabled');
@@ -337,7 +366,7 @@
         robot.route.points.forEach(point => {
             point.marker.dragging.disable();
         });
-    })
+    });
 
     new Sortable(document.getElementById('waypointList'), {
         onEnd: function (event) {
@@ -351,17 +380,17 @@
     $('#clearRouteBtn').on('click', function () {
         robot.route.clear();
         navigator.vibrate(HAPTIC_VIBRATION_TIME);
-    })
+    });
 
     $('#sendRouteBtn').on('click', function () {
+        navigator.vibrate(HAPTIC_VIBRATION_TIME);
         let mission = robot.missions.add(robot.route);
         $('li#' + mission.id + ' .remove-mission-btn').on('click', function () {
             robot.missions.remove(this.parentElement.parentElement.id);
             navigator.vibrate(HAPTIC_VIBRATION_TIME);
         })
-        navigator.vibrate(HAPTIC_VIBRATION_TIME);
         document.getElementById('sendRouteBtn').classList.add('disabled');
-    })
+    });
 
     // EXPLORATION
 
@@ -378,7 +407,7 @@
         robot.area.points.forEach(point => {
             point.marker.dragging.enable();
         });
-    })
+    });
     addingAreaCollapse.addEventListener('hide.bs.collapse', event => {
         if (robot.area.length !== 0){
             document.getElementById('sendAreaBtn').classList.remove('disabled');
@@ -389,7 +418,7 @@
         robot.area.points.forEach(point => {
             point.marker.dragging.disable();
         });
-    })
+    });
 
     new Sortable(document.getElementById('areaList'), {
         onEnd: function (event) {
@@ -406,12 +435,12 @@
     });
 
     $('#sendAreaBtn').on('click', function () {
+        navigator.vibrate(HAPTIC_VIBRATION_TIME);
         let mission = robot.missions.add(robot.area);
         $('li#' + mission.id + ' .remove-mission-btn').on('click', function () {
             robot.missions.remove(this.parentElement.parentElement.id);
             navigator.vibrate(HAPTIC_VIBRATION_TIME);
-        })
-        navigator.vibrate(HAPTIC_VIBRATION_TIME);
+        });
         document.getElementById('sendAreaBtn').classList.add('disabled');
     });
 
@@ -431,14 +460,16 @@
         maxNumberOfNipples: 2,
         dynamicPage: true
     });
+    var cmdVelLoop;
     joystickLeftManager.on('move', function(event, data) {
         positionJoystickLeft.x = data.vector.x;
         positionJoystickLeft.y = data.vector.y;
-        console.log(positionJoystickLeft);
+        clearInterval(cmdVelLoop);
+        cmdVelLoop = setInterval(publishCmdVel, 50);
     }).on('end', function(event, data) {
         positionJoystickLeft.x = 0.0;
         positionJoystickLeft.y = 0.0;
-        console.log(positionJoystickLeft);
+        clearInterval(cmdVelLoop);
     });
     joystickElements.push(joystickLeft);
 
@@ -635,13 +666,20 @@
 
     // FUNCTIONS
 
-    function updatePose(pose) {
-        robot.position.latitude = pose.latitude;
-        robot.position.longitude = pose.longitude;
-        robot.position.altitude = pose.altitude;
-        robot.position.orientation = pose.orientation;
-        robotMarker.setLatLng([pose.latitude, pose.longitude]);
-        robotMarker.setRotationAngle(pose.orientation / 2.0);
+    function updateCurrentMission(mode, id) {
+        if (mode === 0) {
+            $('#currentMissionList').empty()
+        }
+        else {
+            let time = new Date();
+            let intToText = ["Idle", "Guide", "Route", "Exploration"];
+            let intToIcon = {1: '#signpost', 2: '#geo-alt', 3: '#map'};
+            $('#currentMissionList').empty();
+            $('#currentMissionList').append('<li class="list-group-item border border-2 border-primary px-2" id="' + id + '"><div class="align-items-center d-flex gap-2"><div class="handle-mission ms-1" style="display: inline;"></div><svg width="20" height="20" role="img"><use xlink:href="' + intToIcon[mode] + '"></use></svg><span class="flex-grow-1">' + intToText[mode] + '</span><small class="fw-light me-1">' + time.toLocaleTimeString() + '</small><button class="btn btn-sm remove-mission-btn p-0" type="button" style="display: inline;"></button></div></li>');
+            if (robotMarker !== undefined) {
+                robotMarker.bindPopup('<strong>' + robot.name + '</strong>' + ((robot.job !== undefined) ? (' ' + robot.job) : ' Idle'));
+            }
+        }
     }
 
     function updateSignal(signal) {
@@ -664,28 +702,36 @@
     }
 
     function updateBatteryCharge(percentage) {
-        let batteryCharge = document.getElementById("battery-charge");
         let batteryChargeBar = document.getElementById("battery-charge-bar");
-        if (percentage !== batteryCharge.title) {
-            batteryChargeBar.setAttribute("ariavaluenow", percentage + "%");
-            batteryChargeBar.style.width = percentage + "%";
-            batteryCharge.setAttribute("title", percentage + "%");
-            bootstrap.Tooltip.getInstance(batteryCharge).dispose();
-            bootstrap.Tooltip.getOrCreateInstance(batteryCharge);
+        batteryChargeBar.setAttribute("ariavaluenow", percentage + "%");
+        batteryChargeBar.style.width = percentage + "%";
+    }
+
+    function updateMode(mode) {
+        let modeElement = document.getElementById("current-mode");
+        if (mode === 0) {
+            modeElement.setAttribute("display", "none");
+        }
+        else {
+            let intToText = ["Idle", "Guide", "Route", "Exploration"];
+            let intToIcon = ['#cursor-fill', '#signpost-fill', '#geo-alt-fill', '#map-fill'];
+            let svgIcon = document.querySelector('#current-mode> use');
+            modeElement.setAttribute("display", "inline");
+            modeElement.setAttribute("title", "Mission: " + intToText[mode]);
+            svgIcon.setAttribute('xlink:href', intToIcon[mode]);
+            bootstrap.Tooltip.getInstance(modeElement).dispose();
+            bootstrap.Tooltip.getOrCreateInstance(modeElement);
+            toast(robot.name + " now operate a new " + intToText[mode] + " mission");
         }
     }
 
-    function updateIsRunning(is_running, mode = 0) {
-        let isRunning = document.getElementById("is-running");
-        let intToText = ["Idle", "Guide", "Route", "Exploration"]
+    function updateIsRunning(is_running) {
+        let isRunningElement = document.getElementById("is-running");
         if (is_running) {
-            isRunning.setAttribute("display", "inline");
-            isRunning.setAttribute("title", intToText[mode]);
-            bootstrap.Tooltip.getInstance(isRunning).dispose();
-            bootstrap.Tooltip.getOrCreateInstance(isRunning);
+            isRunningElement.style.setProperty("display", "inline-block");
         }
         else {
-            isRunning.setAttribute("display", "none");
+            isRunningElement.style.setProperty("display", "none");
         }
     }
 
@@ -693,6 +739,7 @@
         let eStop = document.getElementById("e-stop");
         if (e_stop) {
             eStop.setAttribute("display", "inline");
+            toast("⚠️ Emergency stop button pressed")
         }
         else {
             eStop.setAttribute("display", "none");
@@ -717,31 +764,148 @@
 
     // ROS
 
-    var ros = new ROSLIB.Ros({url : 'ws://' + robot.address + ':' + robot.port});
-        
+    var rosReconnectLoop = setInterval(connectToRos, 5000);
+    var ros;
+
+    function connectToRos() {
+        console.log('Trying to connect to ROS bridge: ws://' + robot.address + ':' + robot.port);
+        ros = new ROSLIB.Ros({url : 'ws://' + robot.address + ':' + robot.port});
+    }
+
+    connectToRos();
+
+    ros.on('connection', function() {
+        clearInterval(rosReconnectLoop);
+        console.log('Connected to ROS bridge with success');
+        toast('Connected to ' + robot.name);
+    });
+
+    ros.on('error', function(error) {
+        updateSignal(0);
+        toast('Error connecting to ROS bridge');
+        connectToRos();
+    });
+    
+    // Subscribers
+
     var robotStatusListener = new ROSLIB.Topic({
         ros: ros,
-        name: '/status',
+        name: '/mirador/status',
         messageType: 'mirador_driver/Status'
     });
 
-    var robotStatus;
-    var isRecovering = true;
+    // Publishers
+
+    var missionPublisher = new ROSLIB.Topic({
+        ros: ros,
+        name: '/mirador/mission',
+        messageType: 'mirador_driver/Mission'
+    });
+
+    var launchPublisher = new ROSLIB.Topic({
+        ros: ros,
+        name: '/mirador/launch',
+        messageType: 'std_msgs/Empty'
+    });
+
+    var abortPublisher = new ROSLIB.Topic({
+        ros: ros,
+        name: '/mirador/abort',
+        messageType: 'std_msgs/Empty'
+    });
+
+    var cmdVelPublisher = new ROSLIB.Topic({
+        ros: ros,
+        name: '/cmd_vel',
+        messageType: 'geometry_msgs/Twist'
+    });
+
+    // Default robot status
+
+    var robotStatus = {pose: {latitude:0, longitude: 0, altitude: 0, heading: 0}, signal_quality: 0, state_of_charge: 0, is_running: false, mode: 0, flight_status: 0, e_stop: false, camera_elevation: 0, camera_zoom: 1}
 
     robotStatusListener.subscribe(function(status) {
-        robotStatus = status;
-        updatePose(status.position, status.orientation)
-        updateSignal(status.signal_quality);
-        updateBatteryCharge(status.battery_charge);
-        updateIsRunning(status.is_running, status.mode);
-        updateFlightStatus(status.flight_status);
-        updateEStop(status.e_stop);
-        if (isRecovering) {
-            updateCameraElevtaion(status.camera_elevation);
-            updateCameraZoom(status.camera_zoom);
-            isRecovering = false;
+        updatePose(status.pose);
+        if (status.mode !== robotStatus.mode) {
+            updateCurrentMission(status.mode, status.mission_id);
+            updateMode(status.mode);
         }
+        if (status.signal_quality !== robotStatus.signal_quality) {
+            updateSignal(status.signal_quality);
+        }
+        if (status.state_of_charge !== robotStatus.state_of_charge) {
+            updateBatteryCharge(status.state_of_charge);
+        }
+        if (status.is_running !== robotStatus.is_running) {
+            updateIsRunning(status.is_running);
+        }
+        if (status.flight_status !== robotStatus.flight_status) {
+            updateFlightStatus(status.flight_status);
+        }
+        if (status.e_stop !== robotStatus.e_stop) {
+            updateEStop(status.e_stop);
+        }
+        if (status.camera_elevation !== robotStatus.camera_elevation) {
+            updateCameraElevtaion(status.camera_elevation);
+        }
+        if (status.camera_zoom !== robotStatus.camera_zoom) {
+            updateCameraZoom(status.camera_zoom);
+        }
+        robotStatus = status;
     });
+
+    function publishMission(mission) {
+        let currentTime = new Date();
+        let secs = Math.floor(currentTime.getTime()/1000);
+        let nsecs = Math.round(1000000000*(currentTime.getTime()/1000-secs));
+        let missionPoints = [];
+        mission.points.forEach(point => {
+            missionPoints.push({
+                latitude: point.latitude,
+                longitude: point.longitude,
+                altitude: point.altitude
+            });
+        })
+        let missionMessage = new ROSLIB.Message({
+            header : {
+                stamp : {
+                    secs : secs,
+                    nsecs : nsecs
+                }
+            },
+            id : mission.id,
+            type : mission.type,
+            points : missionPoints
+        });
+        missionPublisher.publish(missionMessage);
+    };
+
+    function publishLaunch() {
+        let empty = new ROSLIB.Message();
+        launchPublisher.publish(empty);
+    }
+
+    function publishAbort() {
+        let empty = new ROSLIB.Message();
+        abortPublisher.publish(empty);
+    }
+
+    function publishCmdVel() {
+        console.log(positionJoystickLeft);
+        let twistMessage = new ROSLIB.Message({
+            linear : {
+                x : positionJoystickLeft.y,
+                y : .0,
+                z : .0
+            },
+            angular : {
+                x : .0,
+                y : .0,
+                z : -positionJoystickLeft.x
+            }
+        });
+        cmdVelPublisher.publish(twistMessage);
+    }
 
     window.onunload = window.onbeforeunload = () => {
         socket.close();

@@ -24,6 +24,7 @@
     "express-session": "^1.17.3",
     "jquery": "^3.6.0",
     "leaflet": "^1.8.0",
+    "leaflet-moving-rotated-marker": "0.0.1",
     "mongodb": "^4.7.0",
     "nipplejs": "^0.9.1",
     "pug": "^3.0.2",

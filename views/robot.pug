@@ -8,8 +8,10 @@ html
         script(src="/node_modules/bootstrap/dist/js/bootstrap.bundle.min.js")
         link(href='/node_modules/leaflet/dist/leaflet.css' rel='stylesheet')
         script(src="/node_modules/leaflet/dist/leaflet.js")
+        script(src="/node_modules/leaflet-moving-rotated-marker/leaflet.movingRotatedMarker.js")
         script(src="/node_modules/jquery/dist/jquery.min.js")
         script(src="/node_modules/socket.io/client-dist/socket.io.min.js")
+        script(src='/node_modules/roslib/build/roslib.min.js')
         script(src="/node_modules/nipplejs/dist/nipplejs.js")
         script(src="/node_modules/sortablejs/Sortable.min.js")
         link(href="/public/css/robot.css" rel="stylesheet")
@@ -38,11 +40,15 @@ html
                 path(d='M8 2a.5.5 0 0 1 .5.5V4a.5.5 0 0 1-1 0V2.5A.5.5 0 0 1 8 2zM3.732 3.732a.5.5 0 0 1 .707 0l.915.914a.5.5 0 1 1-.708.708l-.914-.915a.5.5 0 0 1 0-.707zM2 8a.5.5 0 0 1 .5-.5h1.586a.5.5 0 0 1 0 1H2.5A.5.5 0 0 1 2 8zm9.5 0a.5.5 0 0 1 .5-.5h1.5a.5.5 0 0 1 0 1H12a.5.5 0 0 1-.5-.5zm.754-4.246a.389.389 0 0 0-.527-.02L7.547 7.31A.91.91 0 1 0 8.85 8.569l3.434-4.297a.389.389 0 0 0-.029-.518z')
                 path(fill-rule='evenodd' d='M6.664 15.889A8 8 0 1 1 9.336.11a8 8 0 0 1-2.672 15.78zm-4.665-4.283A11.945 11.945 0 0 1 8 10c2.186 0 4.236.585 6.001 1.606a7 7 0 1 0-12.002 0z')
             symbol#signpost(viewbox='0 0 16 16')
-                path(path d='M7 1.414V4H2a1 1 0 0 0-1 1v4a1 1 0 0 0 1 1h5v6h2v-6h3.532a1 1 0 0 0 .768-.36l1.933-2.32a.5.5 0 0 0 0-.64L13.3 4.36a1 1 0 0 0-.768-.36H9V1.414a1 1 0 0 0-2 0zM12.532 5l1.666 2-1.666 2H2V5h10.532z')   
+                path(path d='M7 1.414V4H2a1 1 0 0 0-1 1v4a1 1 0 0 0 1 1h5v6h2v-6h3.532a1 1 0 0 0 .768-.36l1.933-2.32a.5.5 0 0 0 0-.64L13.3 4.36a1 1 0 0 0-.768-.36H9V1.414a1 1 0 0 0-2 0zM12.532 5l1.666 2-1.666 2H2V5h10.532z')
+            symbol#signpost-fill(viewbox='0 0 16 16')
+                path(path d='M7.293.707A1 1 0 0 0 7 1.414V4H2a1 1 0 0 0-1 1v4a1 1 0 0 0 1 1h5v6h2v-6h3.532a1 1 0 0 0 .768-.36l1.933-2.32a.5.5 0 0 0 0-.64L13.3 4.36a1 1 0 0 0-.768-.36H9V1.414A1 1 0 0 0 7.293.707z')
             symbol#cursor-fill(viewbox='0 0 16 16')
                 path(path d='M14.082 2.182a.5.5 0 0 1 .103.557L8.528 15.467a.5.5 0 0 1-.917-.007L5.57 10.694.803 8.652a.5.5 0 0 1-.006-.916l12.728-5.657a.5.5 0 0 1 .556.103z')
             symbol#map(viewbox='0 0 16 16')
                 path(path fill-rule='evenodd' d='M15.817.113A.5.5 0 0 1 16 .5v14a.5.5 0 0 1-.402.49l-5 1a.502.502 0 0 1-.196 0L5.5 15.01l-4.902.98A.5.5 0 0 1 0 15.5v-14a.5.5 0 0 1 .402-.49l5-1a.5.5 0 0 1 .196 0L10.5.99l4.902-.98a.5.5 0 0 1 .415.103zM10 1.91l-4-.8v12.98l4 .8V1.91zm1 12.98 4-.8V1.11l-4 .8v12.98zm-6-.8V1.11l-4 .8v12.98l4-.8z')
+            symbol#map-fill(viewbox='0 0 16 16')
+                path(d='M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10zm0-7a3 3 0 1 1 0-6 3 3 0 0 1 0 6z')
             symbol#geo(viewbox='0 0 16 16')
                 path(fill-rule='evenodd' d='M8 1a3 3 0 1 0 0 6 3 3 0 0 0 0-6zM4 4a4 4 0 1 1 4.5 3.969V13.5a.5.5 0 0 1-1 0V7.97A4 4 0 0 1 4 3.999zm2.493 8.574a.5.5 0 0 1-.411.575c-.712.118-1.28.295-1.655.493a1.319 1.319 0 0 0-.37.265.301.301 0 0 0-.057.09V14l.002.008a.147.147 0 0 0 .016.033.617.617 0 0 0 .145.15c.165.13.435.27.813.395.751.25 1.82.414 3.024.414s2.273-.163 3.024-.414c.378-.126.648-.265.813-.395a.619.619 0 0 0 .146-.15.148.148 0 0 0 .015-.033L12 14v-.004a.301.301 0 0 0-.057-.09 1.318 1.318 0 0 0-.37-.264c-.376-.198-.943-.375-1.655-.493a.5.5 0 1 1 .164-.986c.77.127 1.452.328 1.957.594C12.5 13 13 13.4 13 14c0 .426-.26.752-.544.977-.29.228-.68.413-1.116.558-.878.293-2.059.465-3.34.465-1.281 0-2.462-.172-3.34-.465-.436-.145-.826-.33-1.116-.558C3.26 14.752 3 14.426 3 14c0-.599.5-1 .961-1.243.505-.266 1.187-.467 1.957-.594a.5.5 0 0 1 .575.411z')
             symbol#controller(viewbox='0 0 16 16')
@@ -70,13 +76,19 @@ html
                 path(fill-rule='evenodd' d='M5.5 3.5A1.5 1.5 0 0 1 7 5v6a1.5 1.5 0 0 1-3 0V5a1.5 1.5 0 0 1 1.5-1.5zm5 0A1.5 1.5 0 0 1 12 5v6a1.5 1.5 0 0 1-3 0V5a1.5 1.5 0 0 1 1.5-1.5z')
             symbol#stop-fill(viewbox='0 0 16 16')
                 path(fill-rule='evenodd' d='M5 3.5h6A1.5 1.5 0 0 1 12.5 5v6a1.5 1.5 0 0 1-1.5 1.5H5A1.5 1.5 0 0 1 3.5 11V5A1.5 1.5 0 0 1 5 3.5z')
-            symbol#exlamation-octogon-fill(viewbox='0 0 16 16')
-                path(fill-rule='evenodd' d='M11.46.146A.5.5 0 0 0 11.107 0H4.893a.5.5 0 0 0-.353.146L.146 4.54A.5.5 0 0 0 0 4.893v6.214a.5.5 0 0 0 .146.353l4.394 4.394a.5.5 0 0 0 .353.146h6.214a.5.5 0 0 0 .353-.146l4.394-4.394a.5.5 0 0 0 .146-.353V4.893a.5.5 0 0 0-.146-.353L11.46.146zM8 4c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 4.995A.905.905 0 0 1 8 4zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z')
+            symbol#box-arrow-in-up(viewbox='0 0 16 16')
+                path(fill-rule='evenodd' d='M3.5 10a.5.5 0 0 1-.5-.5v-8a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-.5.5h-2a.5.5 0 0 0 0 1h2A1.5 1.5 0 0 0 14 9.5v-8A1.5 1.5 0 0 0 12.5 0h-9A1.5 1.5 0 0 0 2 1.5v8A1.5 1.5 0 0 0 3.5 11h2a.5.5 0 0 0 0-1h-2z')
+                path(fill-rule='evenodd' d='M7.646 4.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 5.707V14.5a.5.5 0 0 1-1 0V5.707L5.354 7.854a.5.5 0 1 1-.708-.708l3-3z')
+            symbol#sign-stop-fill(viewbox='0 0 16 16')
+                path(d='M10.371 8.277v-.553c0-.827-.422-1.234-.987-1.234-.572 0-.99.407-.99 1.234v.553c0 .83.418 1.237.99 1.237.565 0 .987-.408.987-1.237Zm2.586-.24c.463 0 .735-.272.735-.744s-.272-.741-.735-.741h-.774v1.485h.774Z')
+                path(fill-rule='evenodd' d='M4.893 0a.5.5 0 0 0-.353.146L.146 4.54A.5.5 0 0 0 0 4.893v6.214a.5.5 0 0 0 .146.353l4.394 4.394a.5.5 0 0 0 .353.146h6.214a.5.5 0 0 0 .353-.146l4.394-4.394a.5.5 0 0 0 .146-.353V4.893a.5.5 0 0 0-.146-.353L11.46.146A.5.5 0 0 0 11.107 0H4.893ZM3.16 10.08c-.931 0-1.447-.493-1.494-1.132h.653c.065.346.396.583.891.583.524 0 .83-.246.83-.62 0-.303-.203-.467-.637-.572l-.656-.164c-.61-.147-.978-.51-.978-1.078 0-.706.597-1.184 1.444-1.184.853 0 1.386.475 1.436 1.087h-.645c-.064-.32-.352-.542-.797-.542-.472 0-.77.246-.77.6 0 .261.196.437.553.522l.654.161c.673.164 1.06.487 1.06 1.11 0 .736-.574 1.228-1.544 1.228Zm3.427-3.51V10h-.665V6.57H4.753V6h3.006v.568H6.587Zm4.458 1.16v.544c0 1.131-.636 1.805-1.661 1.805-1.026 0-1.664-.674-1.664-1.805V7.73c0-1.136.638-1.807 1.664-1.807 1.025 0 1.66.674 1.66 1.807ZM11.52 6h1.535c.82 0 1.316.55 1.316 1.292 0 .747-.501 1.289-1.321 1.289h-.865V10h-.665V6.001Z')
             symbol#pin-angle-fill(viewbox='0 0 16 16')
                 path(fill-rule='evenodd' d='M9.828.722a.5.5 0 0 1 .354.146l4.95 4.95a.5.5 0 0 1 0 .707c-.48.48-1.072.588-1.503.588-.177 0-.335-.018-.46-.039l-3.134 3.134a5.927 5.927 0 0 1 .16 1.013c.046.702-.032 1.687-.72 2.375a.5.5 0 0 1-.707 0l-2.829-2.828-3.182 3.182c-.195.195-1.219.902-1.414.707-.195-.195.512-1.22.707-1.414l3.182-3.182-2.828-2.829a.5.5 0 0 1 0-.707c.688-.688 1.673-.767 2.375-.72a5.922 5.922 0 0 1 1.013.16l3.134-3.133a2.772 2.772 0 0 1-.04-.461c0-.43.108-1.022.589-1.503a.5.5 0 0 1 .353-.146z')
             symbol#geo-alt(viewbox='0 0 16 16')
                 path(d='M12.166 8.94c-.524 1.062-1.234 2.12-1.96 3.07A31.493 31.493 0 0 1 8 14.58a31.481 31.481 0 0 1-2.206-2.57c-.726-.95-1.436-2.008-1.96-3.07C3.304 7.867 3 6.862 3 6a5 5 0 0 1 10 0c0 .862-.305 1.867-.834 2.94zM8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10z')
                 path(d='M8 8a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm0 1a3 3 0 1 0 0-6 3 3 0 0 0 0 6z')
+            symbol#geo-alt-fill(viewbox='0 0 16 16')
+                path(d='M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10zm0-7a3 3 0 1 1 0-6 3 3 0 0 1 0 6z')
             symbol#x-circle(viewbox='0 0 16 16')
                 path(d='M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z')
                 path(fill-rule='evenodd' d='M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z')
@@ -210,15 +222,16 @@ html
                     div.rounded-4.shadow(id="omnibox")
                         div.container.rounded-4.bg-white.d-flex.py-2.align-items-center(id="topbar")
                             div.flex-grow-1.gap-2.me-2
-                                svg.rise.me-2(id="signal" width="22" height="22" role="img" aria-label="signal" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Signal")
+                                svg.rise.me-2(id="signal" width="22px" height="22px" role="img" aria-label="signal" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Signal")
                                     use(xlink:href="#reception-0")
-                                svg.rise.me-2(id="is-running" width="22" height="22" role="img" aria-label="is-running" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Operating" display="none")
+                                svg.rise.me-2(id="current-mode" width="22px" height="22px" role="img" aria-label="current-mode" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Idle" display="none")
                                     use(xlink:href="#cursor-fill")
-                                svg.rise.me-2(id="e-stop" width="22" height="22" role="img" aria-label="e-stop" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Emergency Stop" display="none")
-                                    use(xlink:href="#exlamation-octogon-fill")
+                                div.spinner-border(id="is-running" role="status" style="width: 22px; height: 22px; margin-bottom: -4px; display: none;" aria-label="is-running" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Running")
+                                svg.rise.me-2(id="e-stop" width="22px" height="22px" role="img" aria-label="e-stop" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Emergency Stop" display="none")
+                                    use(xlink:href="#sign-stop-fill")
                                 div.uav.badge.bg-dark(id="flight-status" aria-label="flight-status" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Flight Status")
                             b.me-2=`${name}`
-                            div.progress.border.border-2.border-dark.position-relative.bg-light(id="battery-charge" style="height: 20px; width: 40px"  aria-label="battery-charge" data-bs-toggle="tooltip" data-bs-placement="bottom" title="0%")
+                            div.progress.border.border-2.border-dark.position-relative.bg-light(id="battery-charge" style="height: 20px; width: 40px"  aria-label="battery-charge" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Battery")
                                 div.progress-bar.border.border-1.border-light.rounded-1.bg-dark(id="battery-charge-bar" role="progressbar" aria-valuenow="0" style="width: 0%;" aria-valuemin="0" aria-valuemax="100")
                             svg(xmlns='http://www.w3.org/2000/svg' width='3' height='10' style='margin: 0 0 0 1px;')
                                 circle(cx='-2' cy='5' r='5' fill='#212529')
@@ -231,12 +244,17 @@ html
                                             use(xlink:href='#speedometer')
                                         span.h2 Dashboard
                                     div.d-grid.gap-2.pt-2
-                                        ul.list-group.border-bottom-0(id='missionList')
-                                        button(id='playPauseMissionBtn' type='button').btn.btn-primary
+                                        ul.list-group(id='currentMissionList')
+                                        ul.list-group(id='savedMissionList')
+                                        button(id='pushNextMissionBtn' type='button').btn.btn-secondary
+                                            svg.bi(width='16' height='16' role='img')
+                                                use(xlink:href='#box-arrow-in-up')
+                                            |   Push next mission
+                                        button(id='launchMissionBtn' type='button').btn.btn-primary
                                             svg.bi(width='16' height='16' role='img')
                                                 use(xlink:href='#play-fill')
                                             |   Launch mission
-                                        button(id='stopMissionBtn' type='button').btn.btn-danger.disabled
+                                        button(id='stopMissionBtn' type='button').btn.btn-danger
                                             svg.bi(width='16' height='16' role='img')
                                                 use(xlink:href='#stop-fill')
                                             |   Stop mission
@@ -247,11 +265,11 @@ html
                                             use(xlink:href='#signpost')
                                         span.h2 Guide
                                     div.d-grid.gap-2.pt-2
-                                        button(id='playPauseMissionBtn' type='button').btn.btn-primary.disabled
+                                        button(id='pointGuideBtn' type='button').btn.btn-primary.disabled
                                             svg.bi(width='16' height='16' role='img')
                                                 use(xlink:href='#pin-angle-fill')
-                                            |   Pinpoint a target
-                                        button(id='stopMissionBtn' type='button').btn.btn-danger.disabled
+                                            |   Point a target
+                                        button(id='cancelGuidenBtn' type='button').btn.btn-danger.disabled
                                             svg.bi(width='16' height='16' role='img')
                                                 use(xlink:href='#x-circle')
                                             |   Cancel
@@ -283,7 +301,7 @@ html
                                             li.list-group-item.list-group-item-action.d-flex.justify-content-center(id='addWpBtn' data-bs-toggle='collapse' data-bs-target='.multi-collapse-route' role='button' aria-expanded='false' aria-controls='addWpCollapse addingWpCollapse')
                                                 svg.bi.me-2(width="20" height="20" role="img")
                                                     use(xlink:href="#geo")
-                                                |   Modify the route
+                                                |   Modify route
                                         form.pt-2.uav(onsubmit='return false;')
                                             div.input-group.align-items-center
                                                 span.input-group-text.pe-5 Flight altitude
@@ -293,9 +311,7 @@ html
                                                 small 0
                                                 input.form-range.mx-2(type="range" name="altitudeRange" min="0" max="30" step="2" id="altitudeRange" oninput="this.form.altitudeInput.value=this.value;" value=2)
                                                 small 30m
-                                        button.btn.btn-primary.pb-2.mt-2.disabled(id='sendRouteBtn' type='button')
-                                            span.spinner-border.spinner-border-sm(role="status" aria-hidden="true")
-                                            |   Loading...
+                                        button.btn.btn-primary.pb-2.mt-2(id='sendRouteBtn' type='button') Confirm route
                                 // Exploration
                                 div.tab-pane.fade(id="mode-exploration" role="tabpanel" aria-labelledby="exploration-tab")
                                     div.text-center.border-bottom.py-2
@@ -324,10 +340,8 @@ html
                                             li.list-group-item.list-group-item-action.d-flex.justify-content-center(id='addAreaBtn' data-bs-toggle='collapse' data-bs-target='.multi-collapse-exploration' role='button' aria-expanded='false' aria-controls='addAreaCollapse addingAreaCollapse')
                                                 svg.bi.me-2(width="20" height="20" role="img")
                                                     use(xlink:href="#pentagon")
-                                                |   Modify the area
-                                        button(id='sendAreaBtn' type='button').btn.btn-primary.pb-2.mt-2.disabled
-                                            span.spinner-border.spinner-border-sm(role="status" aria-hidden="true")
-                                            |   Loading...
+                                                |   Modify area
+                                        button(id='sendAreaBtn' type='button').btn.btn-primary.pb-2.mt-2 Confirm area
                                 // Control
                                 div.tab-pane.fade(id="mode-control" role="tabpanel" aria-labelledby="control-tab")
                                     div.text-center.border-bottom.py-2

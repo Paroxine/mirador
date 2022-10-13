@@ -137,8 +137,16 @@ main {
 	z-index: 10;
 }
 
-#missionList:empty {
+#currentMissionList:empty {
     display: none;
+}
+
+#savedMissionList:empty {
+    display: none;
+}
+
+#savedMissionList > li:first-child {
+    border: 2px dashed grey;
 }
 
 #waypointList {
@@ -237,7 +245,7 @@ main {
     left: 5rem;
     top: .5rem;
     width: 24rem;
-    background: rgba(248, 249, 250, .85);
+    background: rgba(248, 249, 250, .83);
     backdrop-filter: blur(1rem);
 }
 

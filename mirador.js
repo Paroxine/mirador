@@ -42,7 +42,7 @@ io.on("connection", (socket) => {
         }
         socket.join("robots"); // join Robots room
         socket.join(robot.address); // join WebRTC room
-        console.log("New robot:", socket.id, robot);
+        console.log("New connection:", socket.id, robot);
         console.log("Total:", Object.keys(robots).length);
         socket.broadcast.to("robots").emit("newbie", robot);
         socket.to(robot.address).emit("watcher", socket.id);
@@ -57,6 +57,7 @@ io.on("connection", (socket) => {
     socket.on("broadcaster", () => {
         let address = socket.request.connection.remoteAddress;
         socket.join(address);
+        console.log("New broadcaster:", socket.request.connection.remoteAddress);
         for (let id in robots) {
             if (robots[id].address === address) {
                 socket.emit("watcher", id)

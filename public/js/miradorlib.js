@@ -1,10 +1,11 @@
 class Points {
     constructor(map, robot_name = '', color = '#0d6efd', points = []) {
-        this.id = this.uuidv4;
+        this.id = this.uuidv4();
         this.map = map;
         this.robot_name = robot_name;
         this.color = color;
         this.points = points;
+        this.type = 0;
         this.icon = L.divIcon({
             html: `
             <svg
@@ -118,6 +119,7 @@ class Points {
 class Route extends Points {
     constructor(map, robot_name = '', color = '#0d6efd', points = []) {
         super(map, robot_name, color, points);
+        this.type = 2;
         this.polyline = L.polyline(Array.from(this.points, point => [point.latitude, point.longitude]), {weight: 6, color: this.color}).addTo(map);
     }
 
@@ -201,6 +203,7 @@ class Route extends Points {
 class Exploration extends Points {
     constructor(map, robot_name = '', color = '#0d6efd', points = []) {
         super(map, robot_name, color, points);
+        this.type = 3;
         this.polygon = L.polygon(Array.from(this.points, point => [point.latitude, point.longitude])).addTo(map);
     }
 
@@ -303,7 +306,7 @@ class Missions {
         let name = mission.constructor.name;
         let time = new Date();
         let icon = {'Guide': '#signpost', 'Route': '#geo-alt', 'Exploration': '#map'}
-        $('#missionList').append('<li class="list-group-item px-2" id="' + mission.id + '"><div class="align-items-center d-flex gap-2"><div class="handle-mission ms-1" style="display: inline;"><svg width="20" height="20" role="img"><use xlink:href="#grip-horizontal"></use></svg></div><svg width="20" height="20" role="img"><use xlink:href="' + icon[name] + '"></use></svg><span class="flex-grow-1">' + name + '</span><small class="fw-light me-1">' + time.toLocaleTimeString() + '</small><button class="btn btn-sm remove-mission-btn p-0" type="button" style="display: inline;"><svg class="fill-current" width="20" height="20" role="img"><use xlink:href="#x"></use></svg></button></div></li>');
+        $('#savedMissionList').append('<li class="list-group-item px-2" id="' + mission.id + '"><div class="align-items-center d-flex gap-2"><div class="handle-mission ms-1" style="display: inline;"><svg width="20" height="20" role="img"><use xlink:href="#grip-horizontal"></use></svg></div><svg width="20" height="20" role="img"><use xlink:href="' + icon[name] + '"></use></svg><span class="flex-grow-1">' + name + '</span><small class="fw-light me-1">' + time.toLocaleTimeString() + '</small><button class="btn btn-sm remove-mission-btn p-0" type="button" style="display: inline;"><svg class="fill-current" width="20" height="20" role="img"><use xlink:href="#x"></use></svg></button></div></li>');
         this.missions.push(mission);
         return mission;
     }
@@ -313,6 +316,7 @@ class Missions {
         this.missions = [];
         let removed_mission;
         old_missions.forEach(mission => {
+            console.log(mission.id, id);
             if  (mission.id === id) {
                 removed_mission = mission;
                 $('#' + mission.id).remove();
@@ -326,6 +330,7 @@ class Missions {
 
     swap(old_index, new_index) {
         this.missions.splice(new_index, 0, this.missions.splice(old_index, 1)[0]);
+        console.log(this.missions);
     }
 
     find(id) {
@@ -340,7 +345,7 @@ class Robot {
         this.address = address;
         this.port = port;
         this.color = color;
-        this.position = {latitude: .0, longitude: .0, altitude: .0, orientation: .0};
+        this.position = {latitude: .0, longitude: .0, altitude: .0, heading: .0};
         this.job;
         this.missions;
         this.route;
