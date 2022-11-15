@@ -52,7 +52,6 @@ router.get('/logout', (req, res) => {
 
 router.post('/login', (req, res) => {
     req.session.robot_class = req.body.robot_class;
-    console.log(req.body.robot_class);
     req.session.name = req.body.name;
     req.session.address = req.body.address;
     req.session.port = req.body.port;

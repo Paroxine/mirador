@@ -1,11 +1,17 @@
 (() => {
     'use strict'
+    // Disable right clic
+    document.addEventListener('contextmenu', event => event.preventDefault());
+
+    // Able tooltips
     const tooltipTriggerList = Array.from(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
     tooltipTriggerList.forEach(tooltipTriggerEl => {
         new bootstrap.Tooltip(tooltipTriggerEl);
     })
 
+    // Haptic vibration duration
     const HAPTIC_VIBRATION_TIME = 20;
+    
     var mode = 0;
 
     // TABS
@@ -259,8 +265,7 @@
     function updatePose(pose) {
         if (pose.latitude !== .0 && pose.longitude !== .0) {
             if (robotMarker === undefined) {
-                robotMarker = new L.Marker([pose.latitude, pose.longitude], {icon: getRobotIcon(robot.robot_class, robot.color), rotationOrigin: "center center"});
-                robotMarker.addTo(map).bindPopup('<strong>' + robot.name + '</strong>' + ((robot.job !== undefined) ? (' ' + robot.job) : ' Idle'));
+                robotMarker = new L.Marker([pose.latitude, pose.longitude], {icon: getRobotIcon(robot.robot_class, robot.color), rotationOrigin: "center center"}).addTo(map);
                 map.setView(robotMarker.getLatLng(), 12);
             }
             else {
@@ -287,6 +292,7 @@
                 delete siblings[id];
             }
         };
+        let intToText = ["Idle", "Guide", "Route", "Exploration"];
         for (let id in newSiblings) {
             if (newSiblings[id].position) {
                 if (id in siblings) {
@@ -294,7 +300,7 @@
                     //sibling.job = newSiblings[id].job;
                     siblings[id].marker.setLatLng([siblings[id].position.latitude, siblings[id].position.longitude, siblings[id].position.altitude])
                     .setRotationAngle(siblings[id].position.heading)
-                    .bindPopup('<strong>' + siblings[id].name + '</strong>' + ((siblings[id].job !== null) ? (' ' + siblings[id].job) : ' Idle'));
+                    .bindPopup('<strong>' + siblings[id].name + '</strong> ' + intToText[siblings[id].job]);
 
                 }
                 else {
@@ -302,7 +308,7 @@
                     let siblingIcon = getRobotIcon(siblings[id].robot_class, siblings[id].color);
                     siblings[id].marker = new L.Marker([siblings[id].position.latitude, siblings[id].position.longitude], {icon: siblingIcon, rotationAngle: siblings[id].position.heading, rotationOrigin: "center center"});
                     siblings[id].marker.addTo(map)
-                    .bindPopup('<strong>' + siblings[id].name + '</strong>' + ((siblings[id].job !== null) ? (' ' + siblings[id].job) : ' Idle'));
+                    .bindPopup('<strong>' + siblings[id].name + '</strong> ' + intToText[siblings[id].job]);
                 }
             }
         };
@@ -323,9 +329,10 @@
 
     $('#pushNextMissionBtn').on('click', function () {
         navigator.vibrate(HAPTIC_VIBRATION_TIME);
-        publishMission(robot.missions.missions[0]);
-        robot.missions.remove(robot.missions.missions[0].id);
-
+        if (robot.missions.missions.length > 0) {
+            publishMission(robot.missions.missions[0]);
+            robot.missions.remove(robot.missions.missions[0].id);
+        }
     });
 
     $('#launchMissionBtn').on('click', function () {
@@ -339,6 +346,33 @@
     });
 
     // GUIDE
+
+    robot.guide = new Guide(map, robot.name, '#dc3545');
+
+    var addingGuide = false;
+
+    $('#pointGuideBtn').on('click', function () {
+        navigator.vibrate(HAPTIC_VIBRATION_TIME);
+        addingGuide = true;
+    });
+
+    $('#clearGuideBtn').on('click', function () {
+        robot.guide.clear();
+        publishAbort();
+        document.getElementById('pointGuideBtn').classList.remove('disabled');
+        navigator.vibrate(HAPTIC_VIBRATION_TIME);
+    });
+
+    function pointGuide(event) {
+        navigator.vibrate(HAPTIC_VIBRATION_TIME);
+        let point = robot.guide.add(event.latlng.lat, event.latlng.lng);
+        point.marker.on('move', function (event) {
+            publishMission(robot.guide);
+        })
+        publishMission(robot.guide);
+        document.getElementById('pointGuideBtn').classList.add('disabled');
+        addingGuide = false;
+    }
 
     // NAVIGATION
 
@@ -379,6 +413,8 @@
 
     $('#clearRouteBtn').on('click', function () {
         robot.route.clear();
+        document.getElementById('clearRouteBtn').classList.add('disabled');
+        document.getElementById('sendRouteBtn').classList.add('disabled');
         navigator.vibrate(HAPTIC_VIBRATION_TIME);
     });
 
@@ -391,6 +427,22 @@
         })
         document.getElementById('sendRouteBtn').classList.add('disabled');
     });
+
+    function pointWp(event) {
+        navigator.vibrate(HAPTIC_VIBRATION_TIME);
+        let point = robot.route.add(event.latlng.lat, event.latlng.lng);
+        document.getElementById('clearRouteBtn').classList.remove('disabled');
+        point.marker.on('move', function (event) {
+            point.latitude = event.latlng.lat;
+            point.longitude = event.latlng.lng;
+            $('#' + point.id + ' small').text(point.latitude.toFixed(5) + ', ' + point.longitude.toFixed(5))
+            robot.route.set_polyline();
+        });
+        $('li#' + point.id + ' .remove-waypoint-btn').on('click', function () {
+            navigator.vibrate(HAPTIC_VIBRATION_TIME);
+            robot.route.remove(this.parentElement.parentElement.id);
+        })
+    }
 
     // EXPLORATION
 
@@ -431,6 +483,8 @@
 
     $('#clearAreaBtn').on('click', function () {
         robot.area.clear();
+        document.getElementById('clearAreaBtn').classList.add('disabled');
+        document.getElementById('sendAreaBtn').classList.add('disabled');
         navigator.vibrate(HAPTIC_VIBRATION_TIME);
     });
 
@@ -443,6 +497,22 @@
         });
         document.getElementById('sendAreaBtn').classList.add('disabled');
     });
+
+    function pointVertex(event) {
+        navigator.vibrate(HAPTIC_VIBRATION_TIME);
+        let point = robot.area.add(event.latlng.lat, event.latlng.lng);
+        document.getElementById('clearAreaBtn').classList.remove('disabled');
+        point.marker.on('move', function (event) {
+            point.latitude = event.latlng.lat;
+            point.longitude = event.latlng.lng;
+            $('#' + point.id + ' small').text(point.latitude.toFixed(5) + ', ' + point.longitude.toFixed(5))
+            robot.area.set_polygon();
+        });
+        $('li#' + point.id + ' .remove-area-btn').on('click', function () {
+            navigator.vibrate(HAPTIC_VIBRATION_TIME);
+            robot.area.remove(this.parentElement.parentElement.id);
+        })
+    }
 
     // CONTROL
 
@@ -462,9 +532,20 @@
     });
     var cmdVelLoop;
     joystickLeftManager.on('move', function(event, data) {
-        positionJoystickLeft.x = data.vector.x;
-        positionJoystickLeft.y = data.vector.y;
+        if (data.force >= 2.0) {
+            positionJoystickLeft.x = data.vector.x;
+            positionJoystickLeft.y = data.vector.y;
+        }
+        else if (data.force >= 1.0) {
+            positionJoystickLeft.x = data.force * data.vector.x / 2.0;
+            positionJoystickLeft.y = data.force * data.vector.y / 2.0;
+        }
+        else {
+            positionJoystickLeft.x = data.vector.x / 2.0;
+            positionJoystickLeft.y = data.vector.y / 2.0;
+        }
         clearInterval(cmdVelLoop);
+        console.log(positionJoystickLeft);
         cmdVelLoop = setInterval(publishCmdVel, 50);
     }).on('end', function(event, data) {
         positionJoystickLeft.x = 0.0;
@@ -504,34 +585,16 @@
     map.on('click', function (event) {
         $('.list-group-item.active').removeClass('active');
 
+        if (addingGuide && mode === 1) {
+            pointGuide(event);
+        };
+
         if (addingWp && mode === 2) {
-            let point = robot.route.add(event.latlng.lat, event.latlng.lng);
-            navigator.vibrate(HAPTIC_VIBRATION_TIME);
-            point.marker.on('move', function (event) {
-                point.latitude = event.latlng.lat;
-                point.longitude = event.latlng.lng;
-                $('#' + point.id + ' small').text(point.latitude.toFixed(5) + ', ' + point.longitude.toFixed(5))
-                robot.route.set_polyline();
-            });
-            $('li#' + point.id + ' .remove-waypoint-btn').on('click', function () {
-                robot.route.remove(this.parentElement.parentElement.id);
-                navigator.vibrate(HAPTIC_VIBRATION_TIME);
-            })
+            pointWp(event);
         };
 
         if (addingArea && mode === 3) {
-            let point = robot.area.add(event.latlng.lat, event.latlng.lng);
-            navigator.vibrate(HAPTIC_VIBRATION_TIME);
-            point.marker.on('move', function (event) {
-                point.latitude = event.latlng.lat;
-                point.longitude = event.latlng.lng;
-                $('#' + point.id + ' small').text(point.latitude.toFixed(5) + ', ' + point.longitude.toFixed(5))
-                robot.area.set_polygon();
-            });
-            $('li#' + point.id + ' .remove-area-btn').on('click', function () {
-                robot.area.remove(this.parentElement.parentElement.id);
-                navigator.vibrate(HAPTIC_VIBRATION_TIME);
-            })
+            pointVertex(event);
         };
     })
 
@@ -576,7 +639,7 @@
     });
 
     document.getElementById('changeVideoSourceBtn').addEventListener('click', () => {
-        socket.emit("changeAudioSource");
+        socket.emit("changeVideoSource");
         navigator.vibrate(HAPTIC_VIBRATION_TIME);
     });
 
@@ -598,7 +661,6 @@
 
     socket.on("serverToClient", (data) => {
         toast(data);
-        console.log(data);
     });
 
     socket.on("newbie", (robot) => {
@@ -666,18 +728,22 @@
 
     // FUNCTIONS
 
-    function updateCurrentMission(mode, id) {
+    function updateCurrentMission(mode, mission) {
+        robot.job = mode;
         if (mode === 0) {
             $('#currentMissionList').empty()
+            if (robotMarker !== undefined) {
+                robotMarker.bindPopup('<strong>' + robot.name + '</strong> Idle');
+            }
         }
         else {
             let time = new Date();
             let intToText = ["Idle", "Guide", "Route", "Exploration"];
             let intToIcon = {1: '#signpost', 2: '#geo-alt', 3: '#map'};
             $('#currentMissionList').empty();
-            $('#currentMissionList').append('<li class="list-group-item border border-2 border-primary px-2" id="' + id + '"><div class="align-items-center d-flex gap-2"><div class="handle-mission ms-1" style="display: inline;"></div><svg width="20" height="20" role="img"><use xlink:href="' + intToIcon[mode] + '"></use></svg><span class="flex-grow-1">' + intToText[mode] + '</span><small class="fw-light me-1">' + time.toLocaleTimeString() + '</small><button class="btn btn-sm remove-mission-btn p-0" type="button" style="display: inline;"></button></div></li>');
+            $('#currentMissionList').append('<li class="list-group-item border border-2 border-primary px-2" id="' + mission.id + '"><div class="align-items-center d-flex gap-2"><div class="handle-mission ms-1" style="display: inline;"></div><svg width="20" height="20" role="img"><use xlink:href="' + intToIcon[mode] + '"></use></svg><span class="flex-grow-1">' + intToText[mode] + '</span><small class="fw-light me-1">' + time.toLocaleTimeString() + '</small><button class="btn btn-sm remove-mission-btn p-0" type="button" style="display: inline;"></button></div></li>');
             if (robotMarker !== undefined) {
-                robotMarker.bindPopup('<strong>' + robot.name + '</strong>' + ((robot.job !== undefined) ? (' ' + robot.job) : ' Idle'));
+                robotMarker.bindPopup('<strong>' + robot.name + '</strong> ' + intToText[mode]);
             }
         }
     }
@@ -717,7 +783,7 @@
             let intToIcon = ['#cursor-fill', '#signpost-fill', '#geo-alt-fill', '#map-fill'];
             let svgIcon = document.querySelector('#current-mode> use');
             modeElement.setAttribute("display", "inline");
-            modeElement.setAttribute("title", "Mission: " + intToText[mode]);
+            modeElement.setAttribute("title", "Job: " + intToText[mode]);
             svgIcon.setAttribute('xlink:href', intToIcon[mode]);
             bootstrap.Tooltip.getInstance(modeElement).dispose();
             bootstrap.Tooltip.getOrCreateInstance(modeElement);
@@ -746,6 +812,11 @@
         }
     }
 
+    function updateAltitude(altitude) {
+        let altitudeElement = document.getElementById("altitude");
+        altitudeElement.innerHTML = Math.round(altitude) + "m";
+    }
+
     function updateFlightStatus(flight_status) {
         let flightStatus = document.getElementById("flight-status");
         let intToText = ["LANDED", "TAKING OFF", "FLYING", "LANDING"]
@@ -764,8 +835,8 @@
 
     // ROS
 
-    var rosReconnectLoop = setInterval(connectToRos, 5000);
     var ros;
+    var rosReconnectLoop = setInterval(connectToRos, 5000);
 
     function connectToRos() {
         console.log('Trying to connect to ROS bridge: ws://' + robot.address + ':' + robot.port);
@@ -816,7 +887,7 @@
 
     var cmdVelPublisher = new ROSLIB.Topic({
         ros: ros,
-        name: '/cmd_vel',
+        name: '/twist_marker_server/cmd_vel',
         messageType: 'geometry_msgs/Twist'
     });
 
@@ -826,8 +897,9 @@
 
     robotStatusListener.subscribe(function(status) {
         updatePose(status.pose);
+        updateAltitude(pose.altitude);
         if (status.mode !== robotStatus.mode) {
-            updateCurrentMission(status.mode, status.mission_id);
+            updateCurrentMission(status.mode, status.mission);
             updateMode(status.mode);
         }
         if (status.signal_quality !== robotStatus.signal_quality) {
@@ -891,7 +963,6 @@
     }
 
     function publishCmdVel() {
-        console.log(positionJoystickLeft);
         let twistMessage = new ROSLIB.Message({
             linear : {
                 x : positionJoystickLeft.y,

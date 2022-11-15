@@ -73,8 +73,8 @@ io.on("connection", (socket) => {
     socket.on("candidate", (id, message) => {
         socket.to(id).emit("candidate", socket.id, message);
     });
-    socket.on("changeAudioSource", () => {
-        socket.to(robots[socket.id].address).emit("changeAudioSource");
+    socket.on("changeVideoSource", () => {
+        socket.to(robots[socket.id].address).emit("changeVideoSource");
     });
     socket.on("disconnect", () => {
         if (socket.id in robots) {

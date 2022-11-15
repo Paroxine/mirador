@@ -120,7 +120,7 @@ socket.on("candidate", (id, candidate) => {
   peerConnections[id].addIceCandidate(new RTCIceCandidate(candidate));
 });
 
-socket.on("changeAudioSource", () => {
+socket.on("changeVideoSource", () => {
   changeVideoSource();
 });
 

@@ -292,6 +292,51 @@ main {
     transition: width .35s, height .35s, transform .35s;
 }
 
+.waves {
+    position: relative;
+}
+  
+.waves:before {
+    position: absolute;
+    top: 5%;
+    left: 5%;
+    width: 90%;
+    height: 90%;
+    background: white;
+    border-radius: 50%;
+    z-index: -1;
+    content: "";
+    display: block;
+    animation: wave-animate 4s infinite ease-in;
+}
+  
+.waves:after {
+    position: absolute;
+    top: 5%;
+    left: 5%;
+    width: 90%;
+    height: 90%;
+    background-color: white;
+    border-radius: 50%;
+    z-index: -1;
+    content: "";
+    display: block;
+    animation: wave-animate 4s 2s infinite ease-in;
+  }
+  
+@keyframes wave-animate {
+    0% {
+      transform: scale(2);
+      opacity: 0;
+      transform-origin: center;
+    }
+    100% {
+      transform: scale(1);
+      opacity: 1;
+      transform-origin: center;
+    }
+}
+
 @media only screen and (max-width: 768px) {
     #omnibox {
         width: 18rem;
