@@ -575,13 +575,13 @@
             positionJoystickLeft.x = data.vector.x / 2.0;
             positionJoystickLeft.y = data.vector.y / 2.0;
         }
-        clearInterval(cmdVelLoop);
+        clearInterval(cmdVelLoopLeft);
         console.log(positionJoystickLeft);
-        cmdVelLoop = setInterval(publishCmdVel, 50);
+        cmdVelLoopLeft = setInterval(publishCmdVel, 50);
     }).on('end', function(event, data) {
         positionJoystickLeft.x = 0.0;
         positionJoystickLeft.y = 0.0;
-        clearInterval(cmdVelLoop);
+        clearInterval(cmdVelLoopLeft);
     });
     joystickElements.push(joystickLeft);
 
@@ -599,13 +599,25 @@
             dynamicPage: true
         });
         joystickRightManager.on('move', function(event, data) {
-            positionJoystickRight.x = data.vector.x;
-            positionJoystickRight.y = data.vector.y;
+            if (data.force >= 2.0) {
+                positionJoystickRight.x = data.vector.x;
+                positionJoystickRight.y = data.vector.y;
+            }
+            else if (data.force >= 1.0) {
+                positionJoystickRight.x = data.force * data.vector.x / 2.0;
+                positionJoystickRight.y = data.force * data.vector.y / 2.0;
+            }
+            else {
+                positionJoystickRight.x = data.vector.x / 2.0;
+                positionJoystickRight.y = data.vector.y / 2.0;
+            }
+            clearInterval(cmdVelLoopRight);
             console.log(positionJoystickRight);
+            cmdVelLoopRight = setInterval(publishCmdVel, 50);
         }).on('end', function(event, data) {
             positionJoystickRight.x = 0.0;
             positionJoystickRight.y = 0.0;
-            console.log(positionJoystickRight);
+            clearInterval(cmdVelLoopRight);
         });
         joystickElements.push(joystickRight);
         if (mode == 4) {joystickRight.style.display = 'inline'};
@@ -1033,18 +1045,35 @@
     }
 
     function publishCmdVel() {
-        let twistMessage = new ROSLIB.Message({
-            linear : {
-                x : positionJoystickLeft.y,
-                y : .0,
-                z : .0
-            },
-            angular : {
-                x : .0,
-                y : .0,
-                z : -positionJoystickLeft.x
-            }
-        });
+        let twistMessage;
+        if (robot_config[robot.robot_class].type === "uav") {
+            twistMessage = new ROSLIB.Message({
+                linear : {
+                    x : .0,
+                    y : .0,
+                    z : positionJoystickLeft.y
+                },
+                angular : {
+                    x : positionJoystickRight.y,
+                    y : positionJoystickRight.x,
+                    z : -positionJoystickLeft.x
+                }
+            });
+        }
+        if (robot_config[robot.robot_class].type === "ugv") {
+            twistMessage = new ROSLIB.Message({
+                linear : {
+                    x : positionJoystickLeft.y,
+                    y : .0,
+                    z : .0
+                },
+                angular : {
+                    x : .0,
+                    y : .0,
+                    z : -positionJoystickLeft.x
+                }
+            });
+        }
         cmdVelPublisher.publish(twistMessage);
     }
 

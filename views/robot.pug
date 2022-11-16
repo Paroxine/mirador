@@ -229,8 +229,8 @@ html
                                 div.spinner-border(id="is-running" role="status" style="width: 22px; height: 22px; margin-bottom: -4px; display: none;" aria-label="is-running" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Running")
                                 svg.rise.me-2(id="e-stop" width="22px" height="22px" role="img" aria-label="e-stop" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Emergency Stop" display="none")
                                     use(xlink:href="#sign-stop-fill")
+                                b.me-2(id="altitude" aria-label="altitude" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Altitude")
                                 div.uav.badge.bg-dark(id="flight-status" aria-label="flight-status" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Flight Status")
-                                text.me-2(id="altitude" aria-label="altitude" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Altitude")
                             b.me-2=`${name}`
                             div.progress.border.border-2.border-dark.position-relative.bg-light(id="battery-charge" style="height: 20px; width: 40px"  aria-label="battery-charge" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Battery")
                                 div.progress-bar.border.border-1.border-light.rounded-1.bg-dark(id="battery-charge-bar" role="progressbar" aria-valuenow="0" style="width: 0%;" aria-valuemin="0" aria-valuemax="100")
