@@ -269,7 +269,7 @@
                 robot.position.altitude = pose.altitude;
                 robot.position.heading = pose.heading;
                 robotMarker.setLatLng([pose.latitude, pose.longitude]);
-                robotMarker.setRotationAngle(pose.heading);
+                robotMarker.setRotationAngle(-pose.heading+90);
                 socket.emit("robot", robot.position, robot.job);
             }
         }
@@ -445,6 +445,37 @@
     });
 
     // CONTROL
+
+    $('#takeOffBtn').on('click', function () {
+        navigator.vibrate(HAPTIC_VIBRATION_TIME);
+        publishTakeOff();
+    });
+
+    $('#landBtn').on('click', function () {
+        navigator.vibrate(HAPTIC_VIBRATION_TIME);
+        publishLand();
+    });
+
+    $('#returnToLaunchBtn').on('click', function () {
+        navigator.vibrate(HAPTIC_VIBRATION_TIME);
+        publishReachRTH();
+    });
+
+    $('#setHomeBtn').on('click', function () {
+        navigator.vibrate(HAPTIC_VIBRATION_TIME);
+        publishSetRTH();
+    });
+
+    $('#zoomRange').change(function () {
+        let zoomRange = document.getElementById("zoomRange");
+        publishZoom(zoomRange.value)
+    });
+
+    $('#elevationRange').change(function () {
+        let elevationRange = document.getElementById("elevationRange");
+        publishGimbal(elevationRange.value)
+    });
+
 
     /// JOYSTICK LEFT
 
@@ -748,13 +779,14 @@
 
     function updateFlightStatus(flight_status) {
         let flightStatus = document.getElementById("flight-status");
-        let intToText = ["LANDED", "TAKING OFF", "FLYING", "LANDING"]
+        let intToText = ["LANDED", "TAKING OFF", "FLYING", "LANDING", "HOVERING"]
         flightStatus.innerHTML = intToText[flight_status];
     }
 
     function updateCameraElevtaion(elevation) {
         let elevationRange = document.getElementById("elevationRange");
         elevationRange.value = elevation;
+
     }
 
     function updateCameraZoom(zoom) {
@@ -819,6 +851,44 @@
         name: '/cmd_vel',
         messageType: 'geometry_msgs/Twist'
     });
+
+    var takeOffPublisher = new ROSLIB.Topic({
+        ros: ros,
+        name: 'hmi/cmd_TOL',
+        messageType: 'std_msgs/Bool'
+    });
+
+    var landPublisher = new ROSLIB.Topic({
+        ros: ros,
+        name: 'hmi/cmd_TOL',
+        messageType: 'std_msgs/Bool'
+    });
+
+    var setRTHPublisher = new ROSLIB.Topic({
+        ros: ros,
+        name: 'hmi/set_rth',
+        messageType: 'std_msgs/Empty'
+    });
+
+    var reachRTHPublisher = new ROSLIB.Topic({
+        ros: ros,
+        name: 'hmi/reach_rth',
+        messageType: 'std_msgs/Empty'
+    });
+
+    var zoomPublisher = new ROSLIB.Topic({
+        ros: ros,
+        name: 'control/cmd_zoom',
+        messageType: 'std_msgs/Int8'
+    });
+
+    var gimbalPublisher = new ROSLIB.Topic({
+        ros: ros,
+        name: 'control/cmd_cam',
+        messageType: 'std_msgs/Float32'
+    });
+
+
 
     // Default robot status
 
@@ -905,6 +975,48 @@
             }
         });
         cmdVelPublisher.publish(twistMessage);
+    }
+
+    function publishTakeOff(){
+        console.log("Taking Off");
+        let boolMessage = new ROSLIB.Message({
+            data : true
+        });
+        takeOffPublisher.publish(boolMessage);
+    }
+
+    function publishLand(){
+        console.log("Landing");
+        let boolMessage = new ROSLIB.Message({
+            data : false
+        });
+        landPublisher.publish(boolMessage);
+    }
+
+    function publishSetRTH(){
+        console.log("Set Home");
+        let empty = new ROSLIB.Message();
+        setRTHPublisher.publish(empty);
+    }
+
+    function publishReachRTH(){
+        console.log("Return Home");
+        let empty = new ROSLIB.Message();
+        reachRTHPublisher.publish(empty);
+    }
+
+    function publishZoom(val){
+        let int8Message = new ROSLIB.Message({
+            data : parseInt(val)
+        });
+        zoomPublisher.publish(int8Message);
+    }
+
+    function publishGimbal(val){
+        let float32Message = new ROSLIB.Message({
+            data : parseInt(val)
+        });
+        gimbalPublisher.publish(float32Message);
     }
 
     window.onunload = window.onbeforeunload = () => {
