@@ -1,10 +1,10 @@
 class Points {
-    constructor(map, robot_name = '', color = '#0d6efd', points = []) {
+    constructor(map, robot_name = '', color = '#0d6efd') {
         this.id = this.uuidv4();
         this.map = map;
         this.robot_name = robot_name;
         this.color = color;
-        this.points = points;
+        this.points = [];
         this.type = 0;
         this.icon = L.divIcon({
             html: `
@@ -116,9 +116,66 @@ class Points {
     }
 }
 
+class Guide extends Points {
+    constructor(map, robot_name = '', color = '#0d6efd') {
+        super(map, robot_name, color);
+        this.type = 1;
+        this.icon = L.divIcon({
+            html: `
+            <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+            >
+                <circle
+                    fill="#eeeeee"
+                    stroke="#cccccc"
+                    stroke-width="1"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    >
+                </circle>
+                <circle
+                    fill=` + color + `
+                    cx="12"
+                    cy="12"
+                    r="6"
+                    >
+                </circle>
+            </svg>`,
+            className: "waves",
+            iconSize: [20, 20]
+        });
+    }
+
+    clear() {
+        this.points.forEach(point => {
+            point.marker.remove();
+            $('#' + point.id).remove();
+        });
+        this.points = [];
+    }
+
+    add(latitude, longitude) {
+        this.clear();
+        let point = {
+            id: this.uuidv4(),
+            latitude: latitude,
+            longitude: longitude,
+            marker: new L.marker([latitude, longitude], {icon: this.icon})
+        };
+        point.marker.addTo(this.map)
+        .bindPopup('<strong>Guide</strong> ' + this.robot_name);
+        this.points.push(point);
+        return point;
+    }
+}
+
 class Route extends Points {
-    constructor(map, robot_name = '', color = '#0d6efd', points = []) {
-        super(map, robot_name, color, points);
+    constructor(map, robot_name = '', color = '#0d6efd') {
+        super(map, robot_name, color);
         this.type = 2;
         this.polyline = L.polyline(Array.from(this.points, point => [point.latitude, point.longitude]), {weight: 6, color: this.color}).addTo(map);
     }
@@ -127,11 +184,9 @@ class Route extends Points {
         this.points.forEach(point => {
             point.marker.remove();
             $('#' + point.id).remove();
-        })
+        });
         this.points = [];
         this.set_polyline();
-        document.getElementById('clearRouteBtn').classList.add('disabled');
-        document.getElementById('sendRouteBtn').classList.add('disabled');
     }
 
     add(latitude, longitude) {
@@ -140,7 +195,7 @@ class Route extends Points {
             latitude: latitude,
             longitude: longitude,
             marker: new L.marker([latitude, longitude], {icon: this.icon, draggable: true})
-        }
+        };
         let number = this.points.length + 1;
         point.marker.addTo(this.map)
         .bindPopup('<strong>Waypoint ' + number + '</strong> ' + this.robot_name);
@@ -156,7 +211,6 @@ class Route extends Points {
         })
         this.points.push(point);
         this.set_polyline();
-        document.getElementById('clearRouteBtn').classList.remove('disabled');
         return point;
     }
 
@@ -201,8 +255,8 @@ class Route extends Points {
 }
 
 class Exploration extends Points {
-    constructor(map, robot_name = '', color = '#0d6efd', points = []) {
-        super(map, robot_name, color, points);
+    constructor(map, robot_name = '', color = '#0d6efd') {
+        super(map, robot_name, color);
         this.type = 3;
         this.polygon = L.polygon(Array.from(this.points, point => [point.latitude, point.longitude])).addTo(map);
     }
@@ -214,8 +268,6 @@ class Exploration extends Points {
         })
         this.points = [];
         this.set_polygon();
-        document.getElementById('clearAreaBtn').classList.add('disabled');
-        document.getElementById('sendAreaBtn').classList.add('disabled');
     }
 
     add(latitude, longitude) {
@@ -240,7 +292,6 @@ class Exploration extends Points {
         })
         this.points.push(point);
         this.set_polygon();
-        document.getElementById('clearAreaBtn').classList.remove('disabled');
         return point;
     }
 
@@ -316,7 +367,6 @@ class Missions {
         this.missions = [];
         let removed_mission;
         old_missions.forEach(mission => {
-            console.log(mission.id, id);
             if  (mission.id === id) {
                 removed_mission = mission;
                 $('#' + mission.id).remove();
@@ -348,6 +398,7 @@ class Robot {
         this.position = {latitude: .0, longitude: .0, altitude: .0, heading: .0};
         this.job;
         this.missions;
+        this.guide;
         this.route;
         this.area;
     }
