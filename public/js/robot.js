@@ -134,13 +134,17 @@
     
     // ROBOT CONFIG
 
+    var robotModel;
+
     readTextFile("/public/config/config.json", text => {
         var robot_config = JSON.parse(text);
         if (robot_config[robot.robot_class].type === "uav") {
+            robotModel = "uav";
             hideUGVElements();
             enableRightJoystick();
         }
         if (robot_config[robot.robot_class].type === "ugv") {
+            robotModel = "ugv";
             hideUAVElements();
         }
     });
@@ -274,7 +278,7 @@
                 robot.position.altitude = pose.altitude;
                 robot.position.heading = pose.heading;
                 robotMarker.setLatLng([pose.latitude, pose.longitude]);
-                robotMarker.setRotationAngle(-pose.heading+90);
+                robotMarker.setRotationAngle(pose.heading);
                 socket.emit("robot", robot.position, robot.job);
             }
         }
@@ -561,7 +565,8 @@
         maxNumberOfNipples: 2,
         dynamicPage: true
     });
-    var cmdVelLoop;
+    var cmdVelLoopLeft;
+    var cmdVelLoopRight;
     joystickLeftManager.on('move', function(event, data) {
         if (data.force >= 2.0) {
             positionJoystickLeft.x = data.vector.x;
@@ -979,7 +984,9 @@
 
     robotStatusListener.subscribe(function(status) {
         updatePose(status.pose);
-        updateAltitude(pose.altitude);
+        if (robotModel === "uav") {
+            updateAltitude(status.pose.altitude);
+        }
         if (status.mode !== robotStatus.mode) {
             updateCurrentMission(status.mode, status.mission);
             updateMode(status.mode);
@@ -1046,7 +1053,7 @@
 
     function publishCmdVel() {
         let twistMessage;
-        if (robot_config[robot.robot_class].type === "uav") {
+        if (robotModel === "uav") {
             twistMessage = new ROSLIB.Message({
                 linear : {
                     x : .0,
@@ -1060,7 +1067,7 @@
                 }
             });
         }
-        if (robot_config[robot.robot_class].type === "ugv") {
+        if (robotModel === "ugv") {
             twistMessage = new ROSLIB.Message({
                 linear : {
                     x : positionJoystickLeft.y,
