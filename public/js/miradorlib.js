@@ -177,7 +177,7 @@ class Route extends Points {
     constructor(map, robot_name = '', color = '#0d6efd') {
         super(map, robot_name, color);
         this.type = 2;
-        this.polyline = L.polyline(this.points.map(p => [p.latitude, p.longitude]), { weight:6, color:this.color }).addTo(map);
+        this.polyline = L.polyline(Array.from(this.points, point => [point.latitude, point.longitude]), {weight: 6, color: this.color}).addTo(map);
     }
 
     clear() {
@@ -401,6 +401,7 @@ class Robot {
         this.guide;
         this.route;
         this.area;
+        this.pings;
     }
 }
   

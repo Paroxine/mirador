@@ -23,6 +23,7 @@ const server = app.listen(port, hostname, () => {
 })
 
 let robots = {};
+let pings = {}
 
 const io = require('socket.io')(server);
 
@@ -76,6 +77,15 @@ io.on("connection", (socket) => {
     socket.on("changeVideoSource", () => {
         socket.to(robots[socket.id].address).emit("changeVideoSource");
     });
+
+
+    //PINGS
+    socket.emit("updatePings", pings);
+    socket.on("updatePings", newPings => {
+        pings = newPings;
+        socket.broadcast.emit("updatePings", pings);
+    })
+
     socket.on("disconnect", () => {
         if (socket.id in robots) {
             socket.to("robots").emit("logout", robots[socket.id]);
