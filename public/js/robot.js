@@ -297,7 +297,7 @@
     // ROS
 
     var ros;
-    var streamTopic = "";
+    var streamTopic = "image/compressed";
     var rosReconnectLoop = setInterval(connectToRos, 5000);
 
     function connectToRos() {
@@ -325,12 +325,13 @@
         ros: ros,
         name: '/mirador/status',
         //messageType: 'mirador_driver/Status'
-        messageType: 'mirador_driver/Status'
+        messageType: 'robot_sim/Status'
     });
 
     var videoStreamListener = new ROSLIB.Topic({
         ros: ros,
-        name: "/zed_node/rgb/image_rect_color/compressed",
+        name: streamTopic,
+        //"/zed_node/rgb/image_rect_color/compressed",
         messageType: 'sensor_msgs/CompressedImage'
     });
 
@@ -1076,14 +1077,16 @@
                 hideImageElements();
                 break;
             case 1:
-                hideVideoElements();
+                hideImageElements();
                 break;
             case 2:
                 hideVideoElements();
+                console.log("go to video");
                 const streamImage = document.getElementById('image-stream-display');
                 videoStreamListener.subscribe(function (message) {
                     streamImage.src = "data:image/jpg;base64," + message.data;
                 });
+                
                 break;
             default:
         }
@@ -1097,6 +1100,7 @@
         });
     }
     */
+    
     function publishMission(mission) {
         let currentTime = new Date();
         let secs = Math.floor(currentTime.getTime() / 1000);
