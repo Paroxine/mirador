@@ -11,7 +11,7 @@
 
     // Haptic vibration duration
     const HAPTIC_VIBRATION_TIME = 20;
-    
+
     var mode = 0;
 
     // TABS
@@ -25,7 +25,7 @@
         navigator.vibrate(HAPTIC_VIBRATION_TIME);
     })
     dashboardTab.addEventListener('hide.bs.tab', event => {
-        
+
     })
     const guideTab = document.getElementById('guide')
     guideTab.addEventListener('shown.bs.tab', event => {
@@ -36,7 +36,7 @@
         navigator.vibrate(HAPTIC_VIBRATION_TIME);
     })
     guideTab.addEventListener('hide.bs.tab', event => {
-        
+
     })
     const routeTab = document.getElementById('route')
     routeTab.addEventListener('shown.bs.tab', event => {
@@ -47,7 +47,7 @@
         navigator.vibrate(HAPTIC_VIBRATION_TIME);
     })
     routeTab.addEventListener('hide.bs.tab', event => {
-        
+
     })
     const explorationTap = document.getElementById('exploration')
     explorationTap.addEventListener('shown.bs.tab', event => {
@@ -58,7 +58,7 @@
         navigator.vibrate(HAPTIC_VIBRATION_TIME);
     })
     explorationTap.addEventListener('hide.bs.tab', event => {
-        
+
     })
     const controlTab = document.getElementById('control')
     controlTab.addEventListener('shown.bs.tab', event => {
@@ -81,7 +81,7 @@
         let time = new Date();
         let toast = document.createElement('div');
         toast.className = 'toast';
-        toast.role='alert';
+        toast.role = 'alert';
         toast.innerHTML = '<div class="toast-header"><img class="me-2" width="20" height="20" aria-hidden="true" focusable="false" src="/public/img/mirador-icon.svg" alt="Mirador"><strong class="me-auto">Mirador</strong><small>' + time.toLocaleTimeString() + '</small><button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button></div><div class="toast-body">' + message + '</div>';
         $('.toast-container').append(toast);
         new bootstrap.Toast(toast).show();
@@ -116,7 +116,7 @@
     var overlays = {}
 
     L.control.layers(baseLayers, overlays, { position: 'bottomleft' }).addTo(map);
-    L.control.scale({imperial: false, metric: true,  position: 'bottomright'}).addTo(map);
+    L.control.scale({ imperial: false, metric: true, position: 'bottomright' }).addTo(map);
     map.zoomControl.setPosition('bottomright');
     map.attributionControl.setPrefix(false);
 
@@ -131,16 +131,20 @@
         document.currentScript.getAttribute('port'),
         document.currentScript.getAttribute('color')
     );
-    
+
     // ROBOT CONFIG
+
+    var robotModel;
 
     readTextFile("/public/config/config.json", text => {
         var robot_config = JSON.parse(text);
         if (robot_config[robot.robot_class].type === "uav") {
+            robotModel = "uav";
             hideUGVElements();
             enableRightJoystick();
         }
         if (robot_config[robot.robot_class].type === "ugv") {
+            robotModel = "ugv";
             hideUAVElements();
         }
     });
@@ -148,6 +152,20 @@
     function hideUAVElements() {
         let uav = document.querySelectorAll('.uav');
         uav.forEach(element => {
+            element.style.display = 'none';
+        });
+    }
+
+    function hideImageElements() {
+        let image = document.querySelectorAll('.image-stream');
+        image.forEach(element => {
+            element.style.display = 'none';
+        });
+    }
+
+    function hideVideoElements() {
+        let video = document.querySelectorAll('.video-stream');
+        video.forEach(element => {
             element.style.display = 'none';
         });
     }
@@ -163,7 +181,7 @@
         var rawFile = new XMLHttpRequest();
         rawFile.overrideMimeType("application/json");
         rawFile.open("GET", file, true);
-        rawFile.onreadystatechange = function() {
+        rawFile.onreadystatechange = function () {
             if (rawFile.readyState === 4 && rawFile.status == "200") {
                 callback(rawFile.responseText);
             }
@@ -179,7 +197,7 @@
         return (((r * 0.299) + (g * 0.587) + (b * 0.114)) > 186) ? darkColor : lightColor;
     }
 
-    function getRobotIcon(robot_class, color="#048b9a") {
+    function getRobotIcon(robot_class, color = "#048b9a") {
         let ROBOT_COLOR = color;
         let CONTRAST_COLOR = contrastColor(ROBOT_COLOR, "#eeeeee", "#222222");
         let robotIcon;
@@ -257,7 +275,7 @@
             default:
                 console.log(`Invalid given robot_class: ${robot_class}.`)
         }
-        
+
     }
 
     var robotMarker;
@@ -265,7 +283,7 @@
     function updatePose(pose) {
         if (pose.latitude !== .0 && pose.longitude !== .0) {
             if (robotMarker === undefined) {
-                robotMarker = new L.Marker([pose.latitude, pose.longitude], {icon: getRobotIcon(robot.robot_class, robot.color), rotationOrigin: "center center"}).addTo(map);
+                robotMarker = new L.Marker([pose.latitude, pose.longitude], { icon: getRobotIcon(robot.robot_class, robot.color), rotationOrigin: "center center" }).addTo(map);
                 map.setView(robotMarker.getLatLng(), 12);
             }
             else {
@@ -274,12 +292,179 @@
                 robot.position.altitude = pose.altitude;
                 robot.position.heading = pose.heading;
                 robotMarker.setLatLng([pose.latitude, pose.longitude]);
-                robotMarker.setRotationAngle(-pose.heading+90);
+                robotMarker.setRotationAngle(pose.heading);
+                robotMarker.setRotationAngle(pose.heading);
                 socket.emit("robot", robot.position, robot.job);
             }
         }
 
     }
+    // ROS
+
+    var ros;
+    var streamTopic = "image/compressed";
+    var rosReconnectLoop = setInterval(connectToRos, 5000);
+
+    function connectToRos() {
+        console.log('Trying to connect to ROS bridge: ws://' + robot.address + ':' + robot.port);
+        ros = new ROSLIB.Ros({ url: 'ws://' + robot.address + ':' + robot.port });
+    }
+
+    connectToRos();
+
+    ros.on('connection', function () {
+        clearInterval(rosReconnectLoop);
+        console.log('Connected to ROS bridge with success');
+        toast('Connected to ' + robot.name);
+    });
+
+    ros.on('error', function (error) {
+        updateSignal(0);
+        toast('Error connecting to ROS bridge');
+        connectToRos();
+    });
+
+    // Subscribers
+
+    var robotStatusListener = new ROSLIB.Topic({
+        ros: ros,
+        name: '/mirador/status',
+        messageType: 'mirador_driver/Status'
+        //messageType: 'robot_sim/Status'
+    });
+
+    var videoStreamListener = new ROSLIB.Topic({
+        ros: ros,
+        name: streamTopic,
+        //"/zed_node/rgb/image_rect_color/compressed",
+        messageType: 'sensor_msgs/CompressedImage'
+    });
+
+    // Publishers
+
+    var missionPublisher = new ROSLIB.Topic({
+        ros: ros,
+        name: '/mirador/mission',
+        messageType: 'mirador_driver/Mission'
+    });
+
+    var launchPublisher = new ROSLIB.Topic({
+        ros: ros,
+        name: '/mirador/launch',
+        messageType: 'std_msgs/Empty'
+    });
+
+    var abortPublisher = new ROSLIB.Topic({
+        ros: ros,
+        name: '/mirador/abort',
+        messageType: 'std_msgs/Empty'
+    });
+
+    if (robot.robot_class == 'anafi') {
+        console.log('Anafi logged');
+
+        var cmdVelPublisher = new ROSLIB.Topic({
+            ros: ros,
+            name: 'control/cmd_vel',
+            messageType: 'geometry_msgs/Twist'
+        });
+    } else {
+        console.log('Husky Logged');
+
+        var cmdVelPublisher = new ROSLIB.Topic({
+            ros: ros,
+            name: 'twist_marker_server/cmd_vel',
+            messageType: 'geometry_msgs/Twist'
+        });
+    };
+
+    var takeOffLandPublisher = new ROSLIB.Topic({
+        ros: ros,
+        name: 'hmi/cmd_TOL',
+        messageType: 'std_msgs/Bool'
+    });
+
+    var setRTHPublisher = new ROSLIB.Topic({
+        ros: ros,
+        name: 'hmi/set_rth',
+        messageType: 'std_msgs/Empty'
+    });
+
+    var reachRTHPublisher = new ROSLIB.Topic({
+        ros: ros,
+        name: 'hmi/reach_rth',
+        messageType: 'std_msgs/Empty'
+    });
+
+    var zoomPublisher = new ROSLIB.Topic({
+        ros: ros,
+        name: 'control/cmd_zoom',
+        messageType: 'std_msgs/Int8'
+    });
+
+    var gimbalPublisher = new ROSLIB.Topic({
+        ros: ros,
+        name: 'control/cmd_cam',
+        messageType: 'std_msgs/Float32'
+    });
+
+
+
+    // Default robot status
+
+    var robotStatus = { pose: { latitude: 0, longitude: 0, altitude: 0, heading: 0 }, signal_quality: 0, state_of_charge: 0, is_running: false, mode: 0, flight_status: 0, e_stop: false, camera_elevation: 0, camera_zoom: 1, stream_method: 0, stream_topic: "" }
+
+    robotStatusListener.subscribe(function (status) {
+        updatePose(status.pose);
+        updateAltitude(status.pose.altitude);
+        if (status.mode !== robotStatus.mode) {
+            updateCurrentMission(status.mode, status.mission);
+            updateMode(status.mode);
+            robotStatus.mode = status.mode;
+        }
+        if (status.signal_quality !== robotStatus.signal_quality) {
+            updateSignal(status.signal_quality);
+            robotStatus.signal_quality = status.signal_quality;
+        }
+        if (status.state_of_charge !== robotStatus.state_of_charge) {
+            updateBatteryCharge(status.state_of_charge);
+            robotStatus.state_of_charge = status.state_of_charge;
+        }
+        if (status.is_running !== robotStatus.is_running) {
+            updateIsRunning(status.is_running);
+            robotStatus.is_running = status.is_running;
+        }
+        if (status.flight_status !== robotStatus.flight_status) {
+            updateFlightStatus(status.flight_status);
+            robotStatus.flight_status = status.flight_status;
+        }
+        if (status.e_stop !== robotStatus.e_stop) {
+            updateEStop(status.e_stop);
+            robotStatus.e_stop = status.e_stop;
+        }
+        if (status.camera_elevation !== robotStatus.camera_elevation) {
+            updateCameraElevation(status.camera_elevation);
+            robotStatus.camera_elevation = status.camera_elevation;
+        }
+        if (status.camera_zoom !== robotStatus.camera_zoom) {
+            updateCameraZoom(status.camera_zoom);
+            robotStatus.camera_zoom = status.camera_zoom;
+        }
+        if (status.stream_topic !== robotStatus.stream_topic) {
+            robotStatus.stream_topic = status.stream_topic;
+
+            console.log(status.stream_topic);
+            
+            //Update ROS subscribe topic
+            videoStreamListener.name = robotStatus.stream_topic;
+        }
+        if (status.stream_method !== robotStatus.stream_method) {
+            updateStreamMethod(status.stream_method);
+            robotStatus.stream_method = status.stream_method;
+        }
+
+        robotStatus = status;
+    });
 
     // SIBLINGS MANAGEMENT
 
@@ -299,22 +484,22 @@
                     siblings[id].position = newSiblings[id].position;
                     //sibling.job = newSiblings[id].job;
                     siblings[id].marker.setLatLng([siblings[id].position.latitude, siblings[id].position.longitude, siblings[id].position.altitude])
-                    .setRotationAngle(siblings[id].position.heading)
-                    .bindPopup('<strong>' + siblings[id].name + '</strong> ' + intToText[siblings[id].job]);
+                        .setRotationAngle(siblings[id].position.heading)
+                        .bindPopup('<strong>' + siblings[id].name + '</strong> ' + intToText[siblings[id].job]);
 
                 }
                 else {
-                    siblings[id] = {...newSiblings[id]};
+                    siblings[id] = { ...newSiblings[id] };
                     let siblingIcon = getRobotIcon(siblings[id].robot_class, siblings[id].color);
-                    siblings[id].marker = new L.Marker([siblings[id].position.latitude, siblings[id].position.longitude], {icon: siblingIcon, rotationAngle: siblings[id].position.heading, rotationOrigin: "center center"});
+                    siblings[id].marker = new L.Marker([siblings[id].position.latitude, siblings[id].position.longitude], { icon: siblingIcon, rotationAngle: siblings[id].position.heading, rotationOrigin: "center center" });
                     siblings[id].marker.addTo(map)
-                    .bindPopup('<strong>' + siblings[id].name + '</strong> ' + intToText[siblings[id].job]);
+                        .bindPopup('<strong>' + siblings[id].name + '</strong> ' + intToText[siblings[id].job]);
                 }
             }
         };
     }
 
-    // DASBOARD
+    // DASHBOARD
 
     robot.missions = new Missions();
 
@@ -377,8 +562,10 @@
     // NAVIGATION
 
     robot.route = new Route(map, robot.name, robot.color);
-    
+
     var addingWp = false;
+
+    var altitudeInputValue = 3;
 
     const addingWpCollapse = document.getElementById('addingWpCollapse');
     addingWpCollapse.addEventListener('show.bs.collapse', event => {
@@ -391,7 +578,7 @@
         });
     });
     addingWpCollapse.addEventListener('hide.bs.collapse', event => {
-        if (robot.route.length !== 0){
+        if (robot.route.length !== 0) {
             document.getElementById('sendRouteBtn').classList.remove('disabled');
         }
         $('.handle-waypoint').css('display', 'none');
@@ -460,8 +647,9 @@
             point.marker.dragging.enable();
         });
     });
+
     addingAreaCollapse.addEventListener('hide.bs.collapse', event => {
-        if (robot.area.length !== 0){
+        if (robot.area.length !== 0) {
             document.getElementById('sendAreaBtn').classList.remove('disabled');
         }
         $('.handle-area').css('display', 'none');
@@ -546,23 +734,34 @@
         publishGimbal(elevationRange.value)
     });
 
+    $('#altitudeInput').change(function () {
+        let altitudeInput = document.getElementById("altitudeInput")
+        altitudeInputValue = altitudeInput.value
+    });
+
+    $('#altitudeRange').change(function () {
+        let altitudeInput = document.getElementById("altitudeInput")
+        altitudeInputValue = altitudeInput.value
+    });
 
     /// JOYSTICK LEFT
 
     var joystickElements = [];
+    var cmdVelLoopLeft;
+    var cmdVelLoopRight;
 
     var joystickLeft = document.getElementById('joystick-left');
-    var positionJoystickLeft = {x: 0, y: 0};
+    var positionJoystickLeft = { x: 0, y: 0 };
     var joystickLeftManager = nipplejs.create({
         zone: joystickLeft,
         mode: 'static',
-        position: {left: '50%', top: '50%'},
+        position: { left: '50%', top: '50%' },
         size: 128,
         maxNumberOfNipples: 2,
         dynamicPage: true
     });
     var cmdVelLoop;
-    joystickLeftManager.on('move', function(event, data) {
+    joystickLeftManager.on('move', function (event, data) {
         if (data.force >= 2.0) {
             positionJoystickLeft.x = data.vector.x;
             positionJoystickLeft.y = data.vector.y;
@@ -575,40 +774,55 @@
             positionJoystickLeft.x = data.vector.x / 2.0;
             positionJoystickLeft.y = data.vector.y / 2.0;
         }
-        clearInterval(cmdVelLoop);
+        //publishCmdVel();
+        //console.log(positionJoystickLeft);
+
+        clearInterval(cmdVelLoopLeft);
         console.log(positionJoystickLeft);
-        cmdVelLoop = setInterval(publishCmdVel, 50);
-    }).on('end', function(event, data) {
+        cmdVelLoopLeft = setInterval(publishCmdVel, 50);
+    }).on('end', function (event, data) {
         positionJoystickLeft.x = 0.0;
         positionJoystickLeft.y = 0.0;
-        clearInterval(cmdVelLoop);
+        //publishCmdVel();
+        clearInterval(cmdVelLoopLeft);
+        publishCmdVel();
+
     });
     joystickElements.push(joystickLeft);
 
     /// JOYSTICK RIGHT
 
+    var positionJoystickRight = { x: 0, y: 0 };
     function enableRightJoystick() {
         var joystickRight = document.getElementById('joystick-right');
-        var positionJoystickRight = {x: 0, y: 0};
         var joystickRightManager = nipplejs.create({
             zone: joystickRight,
             mode: 'static',
-            position: {left: '50%', top: '50%'},
+            position: { left: '50%', top: '50%' },
             size: 128,
             maxNumberOfNipples: 2,
             dynamicPage: true
         });
-        joystickRightManager.on('move', function(event, data) {
+
+        joystickRightManager.on('move', function (event, data) {
             positionJoystickRight.x = data.vector.x;
             positionJoystickRight.y = data.vector.y;
+
+            //console.log(positionJoystickRight);
+            //publishCmdVel();
+
+            clearInterval(cmdVelLoopRight);
             console.log(positionJoystickRight);
-        }).on('end', function(event, data) {
+            cmdVelLoopRight = setInterval(publishCmdVel, 50);
+        }).on('end', function (event, data) {
             positionJoystickRight.x = 0.0;
             positionJoystickRight.y = 0.0;
-            console.log(positionJoystickRight);
+            // publishCmdVel();
+            clearInterval(cmdVelLoopRight);
+            publishCmdVel();
         });
         joystickElements.push(joystickRight);
-        if (mode == 4) {joystickRight.style.display = 'inline'};
+        if (mode == 4) { joystickRight.style.display = 'inline' };
     }
 
     // MAP HANDLE
@@ -657,7 +871,7 @@
     });
 
     document.getElementById('enableAudioBtn').addEventListener('click', () => {
-        let streamDisplay = document.getElementById('stream-display');
+        let streamDisplay = document.getElementById('video-stream-display');
         let svgVolume = document.querySelector('#enableAudioBtn > svg > use');
         if (streamDisplay.toggleAttribute('muted')) {
             streamDisplay.muted = true;
@@ -687,7 +901,7 @@
     const socket = io.connect(window.location.origin);
 
     socket.on("connect", () => {
-        socket.emit('login', {robot_class: robot.robot_class, name: robot.name, address: robot.address, port: robot.port, color: robot.color});
+        socket.emit('login', { robot_class: robot.robot_class, name: robot.name, address: robot.address, port: robot.port, color: robot.color });
     });
 
     socket.on("serverToClient", (data) => {
@@ -719,7 +933,7 @@
     let peerConnection;
     const webrtc_config = {
         iceServers: [
-            { 
+            {
                 "urls": "stun:stun.l.google.com:19302",
             },
             // { 
@@ -730,7 +944,7 @@
         ]
     };
 
-    const stream = document.getElementById('stream-display');
+    const streamVideo = document.getElementById('video-stream-display');
 
     socket.on("offer", (id, description) => {
         peerConnection = new RTCPeerConnection(webrtc_config);
@@ -739,10 +953,11 @@
             .then(() => peerConnection.createAnswer())
             .then(sdp => peerConnection.setLocalDescription(sdp))
             .then(() => {
-            socket.emit("answer", id, peerConnection.localDescription);
+                socket.emit("answer", id, peerConnection.localDescription);
             });
         peerConnection.ontrack = event => {
-            stream.srcObject = event.streams[0];
+            streamVideo.srcObject = event.streams[0];
+            toast('Connected to WebRTC !');
         };
         peerConnection.onicecandidate = event => {
             if (event.candidate) {
@@ -757,6 +972,7 @@
             .catch(e => console.error(e));
     });
 
+
     // FUNCTIONS
 
     function updateCurrentMission(mode, mission) {
@@ -770,7 +986,7 @@
         else {
             let time = new Date();
             let intToText = ["Idle", "Guide", "Route", "Exploration"];
-            let intToIcon = {1: '#signpost', 2: '#geo-alt', 3: '#map'};
+            let intToIcon = { 1: '#signpost', 2: '#geo-alt', 3: '#map' };
             $('#currentMissionList').empty();
             $('#currentMissionList').append('<li class="list-group-item border border-2 border-primary px-2" id="' + mission.id + '"><div class="align-items-center d-flex gap-2"><div class="handle-mission ms-1" style="display: inline;"></div><svg width="20" height="20" role="img"><use xlink:href="' + intToIcon[mode] + '"></use></svg><span class="flex-grow-1">' + intToText[mode] + '</span><small class="fw-light me-1">' + time.toLocaleTimeString() + '</small><button class="btn btn-sm remove-mission-btn p-0" type="button" style="display: inline;"></button></div></li>');
             if (robotMarker !== undefined) {
@@ -854,7 +1070,7 @@
         flightStatus.innerHTML = intToText[flight_status];
     }
 
-    function updateCameraElevtaion(elevation) {
+    function updateCameraElevation(elevation) {
         let elevationRange = document.getElementById("elevationRange");
         elevationRange.value = elevation;
 
@@ -865,159 +1081,60 @@
         zoomRange.value = zoom;
     }
 
-    // ROS
-
-    var ros;
-    var rosReconnectLoop = setInterval(connectToRos, 5000);
-
-    function connectToRos() {
-        console.log('Trying to connect to ROS bridge: ws://' + robot.address + ':' + robot.port);
-        ros = new ROSLIB.Ros({url : 'ws://' + robot.address + ':' + robot.port});
+    function updateStreamMethod(method) {
+        switch (method) {
+            case 0:
+                hideImageElements();
+                break;
+            case 1:
+                hideImageElements();
+                break;
+            case 2:
+                hideVideoElements();
+                console.log("Topic Video on topic: "+ videoStreamListener.name);
+                const streamImage = document.getElementById('image-stream-display');
+                videoStreamListener.subscribe(function (message) {
+                    streamImage.src = "data:image/jpg;base64," + message.data;
+                });
+                
+                break;
+            default:
+        }
     }
-
-    connectToRos();
-
-    ros.on('connection', function() {
-        clearInterval(rosReconnectLoop);
-        console.log('Connected to ROS bridge with success');
-        toast('Connected to ' + robot.name);
-    });
-
-    ros.on('error', function(error) {
-        updateSignal(0);
-        toast('Error connecting to ROS bridge');
-        connectToRos();
-    });
+    /*
+    if (robotStatus.stream_method == 2) {
+        console.log("go to video");
+        const streamImage = document.getElementById('image-stream-display');
+        videoStreamListener.subscribe(function (message) {
+            streamImage.src = "data:image/jpg;base64," + message.data;
+        });
+    }
+    */
     
-    // Subscribers
-
-    var robotStatusListener = new ROSLIB.Topic({
-        ros: ros,
-        name: '/mirador/status',
-        messageType: 'mirador_driver/Status'
-    });
-
-    // Publishers
-
-    var missionPublisher = new ROSLIB.Topic({
-        ros: ros,
-        name: '/mirador/mission',
-        messageType: 'mirador_driver/Mission'
-    });
-
-    var launchPublisher = new ROSLIB.Topic({
-        ros: ros,
-        name: '/mirador/launch',
-        messageType: 'std_msgs/Empty'
-    });
-
-    var abortPublisher = new ROSLIB.Topic({
-        ros: ros,
-        name: '/mirador/abort',
-        messageType: 'std_msgs/Empty'
-    });
-
-    var cmdVelPublisher = new ROSLIB.Topic({
-        ros: ros,
-        name: '/twist_marker_server/cmd_vel',
-        messageType: 'geometry_msgs/Twist'
-    });
-
-    var takeOffPublisher = new ROSLIB.Topic({
-        ros: ros,
-        name: 'hmi/cmd_TOL',
-        messageType: 'std_msgs/Bool'
-    });
-
-    var landPublisher = new ROSLIB.Topic({
-        ros: ros,
-        name: 'hmi/cmd_TOL',
-        messageType: 'std_msgs/Bool'
-    });
-
-    var setRTHPublisher = new ROSLIB.Topic({
-        ros: ros,
-        name: 'hmi/set_rth',
-        messageType: 'std_msgs/Empty'
-    });
-
-    var reachRTHPublisher = new ROSLIB.Topic({
-        ros: ros,
-        name: 'hmi/reach_rth',
-        messageType: 'std_msgs/Empty'
-    });
-
-    var zoomPublisher = new ROSLIB.Topic({
-        ros: ros,
-        name: 'control/cmd_zoom',
-        messageType: 'std_msgs/Int8'
-    });
-
-    var gimbalPublisher = new ROSLIB.Topic({
-        ros: ros,
-        name: 'control/cmd_cam',
-        messageType: 'std_msgs/Float32'
-    });
-
-
-
-    // Default robot status
-
-    var robotStatus = {pose: {latitude:0, longitude: 0, altitude: 0, heading: 0}, signal_quality: 0, state_of_charge: 0, is_running: false, mode: 0, flight_status: 0, e_stop: false, camera_elevation: 0, camera_zoom: 1}
-
-    robotStatusListener.subscribe(function(status) {
-        updatePose(status.pose);
-        updateAltitude(pose.altitude);
-        if (status.mode !== robotStatus.mode) {
-            updateCurrentMission(status.mode, status.mission);
-            updateMode(status.mode);
-        }
-        if (status.signal_quality !== robotStatus.signal_quality) {
-            updateSignal(status.signal_quality);
-        }
-        if (status.state_of_charge !== robotStatus.state_of_charge) {
-            updateBatteryCharge(status.state_of_charge);
-        }
-        if (status.is_running !== robotStatus.is_running) {
-            updateIsRunning(status.is_running);
-        }
-        if (status.flight_status !== robotStatus.flight_status) {
-            updateFlightStatus(status.flight_status);
-        }
-        if (status.e_stop !== robotStatus.e_stop) {
-            updateEStop(status.e_stop);
-        }
-        if (status.camera_elevation !== robotStatus.camera_elevation) {
-            updateCameraElevtaion(status.camera_elevation);
-        }
-        if (status.camera_zoom !== robotStatus.camera_zoom) {
-            updateCameraZoom(status.camera_zoom);
-        }
-        robotStatus = status;
-    });
-
     function publishMission(mission) {
         let currentTime = new Date();
-        let secs = Math.floor(currentTime.getTime()/1000);
-        let nsecs = Math.round(1000000000*(currentTime.getTime()/1000-secs));
+        let secs = Math.floor(currentTime.getTime() / 1000);
+        let nsecs = Math.round(1000000000 * (currentTime.getTime() / 1000 - secs));
         let missionPoints = [];
         mission.points.forEach(point => {
+            let altitudeVar = parseFloat(altitudeInputValue)
             missionPoints.push({
                 latitude: point.latitude,
                 longitude: point.longitude,
-                altitude: point.altitude
+                altitude: altitudeVar
             });
+
         })
         let missionMessage = new ROSLIB.Message({
-            header : {
-                stamp : {
-                    secs : secs,
-                    nsecs : nsecs
+            header: {
+                stamp: {
+                    secs: secs,
+                    nsecs: nsecs
                 }
             },
-            id : mission.id,
-            type : mission.type,
-            points : missionPoints
+            id: mission.id,
+            type: mission.type,
+            points: missionPoints
         });
         missionPublisher.publish(missionMessage);
     };
@@ -1033,59 +1150,77 @@
     }
 
     function publishCmdVel() {
-        let twistMessage = new ROSLIB.Message({
-            linear : {
-                x : positionJoystickLeft.y,
-                y : .0,
-                z : .0
-            },
-            angular : {
-                x : .0,
-                y : .0,
-                z : -positionJoystickLeft.x
-            }
-        });
+        let twistMessage
+
+        if (robot.robot_class == "anafi") {
+            twistMessage = new ROSLIB.Message({
+                linear: {
+                    x: positionJoystickRight.y * 100,
+                    y: positionJoystickRight.x * 100,
+                    z: positionJoystickLeft.y * 100
+                },
+                angular: {
+                    x: .0,
+                    y: .0,
+                    z: positionJoystickLeft.x * 100
+                }
+            });
+        }
+        else {
+            twistMessage = new ROSLIB.Message({
+                linear: {
+                    x: positionJoystickLeft.y,
+                    y: .0,
+                    z: .0
+                },
+                angular: {
+                    x: .0,
+                    y: .0,
+                    z: -positionJoystickLeft.x
+                }
+            });
+        }
         cmdVelPublisher.publish(twistMessage);
     }
 
-    function publishTakeOff(){
+    function publishTakeOff() {
         console.log("Taking Off");
         let boolMessage = new ROSLIB.Message({
-            data : true
+            data: true
         });
-        takeOffPublisher.publish(boolMessage);
+        takeOffLandPublisher.publish(boolMessage);
     }
 
-    function publishLand(){
+    function publishLand() {
         console.log("Landing");
         let boolMessage = new ROSLIB.Message({
-            data : false
+            data: false
         });
-        landPublisher.publish(boolMessage);
+        takeOffLandPublisher.publish(boolMessage);
     }
 
-    function publishSetRTH(){
+    function publishSetRTH() {
         console.log("Set Home");
         let empty = new ROSLIB.Message();
         setRTHPublisher.publish(empty);
     }
 
-    function publishReachRTH(){
+    function publishReachRTH() {
         console.log("Return Home");
         let empty = new ROSLIB.Message();
         reachRTHPublisher.publish(empty);
     }
 
-    function publishZoom(val){
+    function publishZoom(val) {
         let int8Message = new ROSLIB.Message({
-            data : parseInt(val)
+            data: parseInt(val)
         });
         zoomPublisher.publish(int8Message);
     }
 
-    function publishGimbal(val){
+    function publishGimbal(val) {
         let float32Message = new ROSLIB.Message({
-            data : parseInt(val)
+            data: parseFloat(val)
         });
         gimbalPublisher.publish(float32Message);
     }
@@ -1094,5 +1229,5 @@
         socket.close();
         if (typeof peerConnection !== 'undefined') { peerConnection.close(); }
     };
-    
+
 })()
