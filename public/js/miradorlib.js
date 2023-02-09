@@ -164,7 +164,7 @@ class Guide extends Points {
             id: this.uuidv4(),
             latitude: latitude,
             longitude: longitude,
-            marker: new L.marker([latitude, longitude], {icon: this.icon})
+            marker: new L.marker([latitude, longitude], {draggable: true, icon: this.icon})
         };
         point.marker.addTo(this.map)
         .bindPopup('<strong>Guide</strong> ' + this.robot_name);

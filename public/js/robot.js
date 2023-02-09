@@ -134,13 +134,17 @@
 
     // ROBOT CONFIG
 
+    var robotModel;
+
     readTextFile("/public/config/config.json", text => {
         var robot_config = JSON.parse(text);
         if (robot_config[robot.robot_class].type === "uav") {
+            robotModel = "uav";
             hideUGVElements();
             enableRightJoystick();
         }
         if (robot_config[robot.robot_class].type === "ugv") {
+            robotModel = "ugv";
             hideUAVElements();
         }
     });
@@ -288,6 +292,7 @@
                 robot.position.altitude = pose.altitude;
                 robot.position.heading = pose.heading;
                 robotMarker.setLatLng([pose.latitude, pose.longitude]);
+                robotMarker.setRotationAngle(pose.heading);
                 robotMarker.setRotationAngle(pose.heading);
                 socket.emit("robot", robot.position, robot.job);
             }
