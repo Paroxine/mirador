@@ -324,8 +324,8 @@
     var robotStatusListener = new ROSLIB.Topic({
         ros: ros,
         name: '/mirador/status',
-        //messageType: 'mirador_driver/Status'
-        messageType: 'robot_sim/Status'
+        messageType: 'mirador_driver/Status'
+        //messageType: 'robot_sim/Status'
     });
 
     var videoStreamListener = new ROSLIB.Topic({
@@ -356,7 +356,7 @@
     });
 
     if (robot.robot_class == 'anafi') {
-        console.log('anafi');
+        console.log('Anafi logged');
 
         var cmdVelPublisher = new ROSLIB.Topic({
             ros: ros,
@@ -364,7 +364,7 @@
             messageType: 'geometry_msgs/Twist'
         });
     } else {
-        console.log('husky');
+        console.log('Husky Logged');
 
         var cmdVelPublisher = new ROSLIB.Topic({
             ros: ros,
@@ -447,6 +447,11 @@
         }
         if (status.stream_topic !== robotStatus.stream_topic) {
             robotStatus.stream_topic = status.stream_topic;
+
+            console.log(status.stream_topic);
+            
+            //Update ROS subscribe topic
+            videoStreamListener.name = robotStatus.stream_topic;
         }
         if (status.stream_method !== robotStatus.stream_method) {
             updateStreamMethod(status.stream_method);
@@ -1081,7 +1086,7 @@
                 break;
             case 2:
                 hideVideoElements();
-                console.log("go to video");
+                console.log("Topic Video on topic: "+ videoStreamListener.name);
                 const streamImage = document.getElementById('image-stream-display');
                 videoStreamListener.subscribe(function (message) {
                     streamImage.src = "data:image/jpg;base64," + message.data;
