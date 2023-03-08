@@ -565,7 +565,9 @@
 
     var addingWp = false;
 
-    var altitudeInputValue = 3;
+    document.getElementById("altitudeInput")
+    
+    var altitudeInputValue = altitudeInput.value;
 
     const addingWpCollapse = document.getElementById('addingWpCollapse');
     addingWpCollapse.addEventListener('show.bs.collapse', event => {
