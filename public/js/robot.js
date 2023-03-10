@@ -365,7 +365,7 @@
 
         var cmdVelPublisher = new ROSLIB.Topic({
             ros: ros,
-            name: 'control/cmd_vel',
+            name: 'mirador/cmd_vel',
             messageType: 'geometry_msgs/Twist'
         });
     } else {
@@ -380,31 +380,31 @@
 
     var takeOffLandPublisher = new ROSLIB.Topic({
         ros: ros,
-        name: 'hmi/cmd_TOL',
+        name: 'mirador/cmd_TOL',
         messageType: 'std_msgs/Bool'
     });
 
     var setRTHPublisher = new ROSLIB.Topic({
         ros: ros,
-        name: 'hmi/set_rth',
+        name: 'mirador/set_rth',
         messageType: 'std_msgs/Empty'
     });
 
     var reachRTHPublisher = new ROSLIB.Topic({
         ros: ros,
-        name: 'hmi/reach_rth',
+        name: 'mirador/reach_rth',
         messageType: 'std_msgs/Empty'
     });
 
     var zoomPublisher = new ROSLIB.Topic({
         ros: ros,
-        name: 'control/cmd_zoom',
+        name: 'mirador/cmd_zoom',
         messageType: 'std_msgs/Int8'
     });
 
     var gimbalPublisher = new ROSLIB.Topic({
         ros: ros,
-        name: 'control/cmd_cam',
+        name: 'mirador/cmd_cam',
         messageType: 'std_msgs/Float32'
     });
 
@@ -1063,7 +1063,7 @@
 
     function updateAltitude(altitude) {
         let altitudeElement = document.getElementById("altitude");
-        altitudeElement.innerHTML = Math.round(altitude) + "m";
+        altitudeElement.innerHTML = altitude.toFixed(1) + "m";
     }
 
     function updateFlightStatus(flight_status) {
