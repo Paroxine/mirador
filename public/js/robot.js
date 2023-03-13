@@ -473,6 +473,7 @@
             updateStreamMethod(status.stream_method);
             robotStatus.stream_method = status.stream_method;
         }
+        updateServerStrategicPoints(status.mission_context.strategic_points);
 
         robotStatus = status;
     });
@@ -1371,7 +1372,7 @@
             updateCameraZoom(status.camera_zoom);
         }
         robotStatus = status;
-    });
+    }
 
     function publishMission(mission) {
         let currentTime = new Date();
