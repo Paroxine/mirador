@@ -88,12 +88,19 @@ io.on("connection", (socket) => {
 
     socket.on("disconnect", () => {
         if (socket.id in robots) {
+            //console.log("Logout :", robots);
+            // Send a logout message to other robots
             socket.to("robots").emit("logout", robots[socket.id]);
+            socket.to(robots[socket.id].address).emit("disconnectWatcher", socket.id);
+            delete robots[socket.id];
+            /*
             robots[socket.id].countdown = setTimeout(() => {
                 delete robots[socket.id]
             }, 1000);
+            */
+
             console.log("Total:", Object.keys(robots).length);
-            socket.to(robots[socket.id].address).emit("disconnectWatcher", socket.id);
+            //socket.to(robots[socket.id].address).emit("disconnectWatcher", socket.id);
         }
     });
 });

@@ -278,7 +278,12 @@ main {
     transition: width .35s, height .35s, transform .35s;
 }
 
-#stream-display {
+#video-stream-display {
+    width: 100%;
+    height: 100%;
+}
+
+#image-stream-display {
     width: 100%;
     height: 100%;
 }
