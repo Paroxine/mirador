@@ -23,10 +23,13 @@ const server = app.listen(port, hostname, () => {
 })
 
 let robots = {};
+let strategic_points = [];
+let pings = {}
 
 const io = require('socket.io')(server);
 
 const mirador = require('./public/js/miradorlib.js');
+const { randomUUID } = require('crypto');
 
 io.on("connection", (socket) => {
 
@@ -76,6 +79,41 @@ io.on("connection", (socket) => {
     socket.on("changeVideoSource", () => {
         socket.to(robots[socket.id].address).emit("changeVideoSource");
     });
+
+
+    //PINGS
+    socket.emit("updatePings", pings);
+    socket.on("updatePings", newPings => {
+        pings = newPings;
+        socket.broadcast.emit("updatePings", pings);
+    })
+    
+    //STRATEGIC POINTS
+    socket.emit("updateStrategicPoints", strategic_points);
+    socket.on("updateStrategicPoints", robot_points => {
+        let i = 0;
+        for (let point of robot_points) {   
+            let known = false;
+            for (let known_point of strategic_points) {
+                if (samePosition(point.position, known_point.position)) {
+                    known = true;
+                    known_point.status = point.status;
+                    break;
+                }
+            }
+            if (!known) {
+                point.id = strategic_points.length;
+                console.log(`New strategic point at ${point.position.latitude},${point.position.longitude}`);
+                strategic_points.push(point);
+            }
+            i++;
+        }
+        console.log("strats");
+        console.log(strategic_points);
+
+        io.emit("updateStrategicPoints", strategic_points);
+    });
+
     socket.on("disconnect", () => {
         if (socket.id in robots) {
             //console.log("Logout :", robots);
@@ -94,3 +132,9 @@ io.on("connection", (socket) => {
         }
     });
 });
+
+const POSITION_MIN_DISTANCE = 0.0001;
+function samePosition(p1, p2) {
+    return Math.abs(p1.longitude - p2.longitude) < POSITION_MIN_DISTANCE &&
+           Math.abs(p1.latitude  - p2.latitude) < POSITION_MIN_DISTANCE/2;
+}

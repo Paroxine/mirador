@@ -60,6 +60,19 @@ html
             symbol#info-circle(viewbox='0 0 16 16')
                 path(d='M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z')
                 path(d='m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z')
+            symbol#crosshair(viewbox='0 0 16 16')
+                path(fill-rule='evenodd',d='M8,2 A6,6,0,1,1,8,14 A6,6,0,1,1,8,2 M8,3 A5,5,0,1,1,8,13 A5,5,0,1,1,8,3')
+                path(fill-rule='evenodd',d='M0,8 l0,0.5 l5,0 l0,-1 l-5,0 M16,8 l0,0.5 l-5,0 l0,-1 l5,0 M8,0 l0.5,0 l0,5 l-1,0 l0,-5 M8,16 l0.5,0 l0,-5, l-1,0, l0,5')
+            symbol#flag(viewbox='0 0 16 16')
+                path(fill-rule='evenodd',d='M0,2 C2,0 6,0 8,2 C10,4 14,4 16,2 L16,10 C14,12 10,12 8,10 C6,8 2,8 0,10 L0,2')
+                path(fill-rule='evenodd',d='M0,2 L1,2 L1,16 L0,16')
+            symbol#eye(viewbox='0 0 16 16')
+                path(fill-rule='evenodd',d='M0,8 C4,2 12,2 16,8 C12,14 4,14 0,8 M2,8 C5,4 11,4 14,8 C11,12 5,12 2,8')
+                path(fill-rule='evenodd',d='M6,8 A2 2 180 0 0 10,8 A2 2 180 1 0 6,8')
+            symbol#eye-closed(viewbox='0 0 16 16')
+                path(fill-rule='evenodd',d='M0,8 C4,2 12,2 16,8 C12,14 4,14 0,8 M2,8 C5,4 11,4 14,8 C11,12 5,12 2,8')
+                path(fill-rule='evenodd',d='M6,8 A2 2 180 0 0 10,8 A2 2 180 1 0 6,8')
+                path(fill-rule='evenodd',d='M0,15 L15,0 L16,1 L 1,16 L0,15')
             symbol#reception-0(viewbox='0 0 16 16')
                 path(fill-rule='evenodd' d='M0 13.5a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 0 1h-2a.5.5 0 0 1-.5-.5zm4 0a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 0 1h-2a.5.5 0 0 1-.5-.5zm4 0a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 0 1h-2a.5.5 0 0 1-.5-.5zm4 0a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 0 1h-2a.5.5 0 0 1-.5-.5z')
             symbol#reception-1(viewbox='0 0 16 16')
@@ -202,6 +215,16 @@ html
                                     a.nav-link.py-3.border-bottom.rounded-0(href='#mode-control' id="control" data-bs-toggle="pill" type="button" role="tab" data-bs-target="#mode-control" aria-controls="mode-control" aria-selected="false")
                                         svg.bi.pe-none(width='26' height='26' role='img' aria-label='Control')
                                             use(xlink:href='#dpad')
+                            li.nav-item(role="presentation")
+                                span(data-bs-toggle="tooltip" data-bs-placement="right" title="Ping")
+                                    a.nav-link.py-3.border-bottom.rounded-0(href='#mode-ping' id="ping" data-bs-toggle="pill" type="button" role="tab" data-bs-target="#mode-ping" aria-controls="mode-ping" aria-selected="false")
+                                        svg.bi.pe-none(width='26' height='26' role='img' aria-label='Ping')
+                                            use(xlink:href='#crosshair')
+                            li.nav-item(role="presentation")
+                                span(data-bs-toggle="tooltip" data-bs-placement="right" title="Strategic points")
+                                    a.nav-link.py-3.border-bottom.rounded-0(href='#mode-strategic-points' id="strategic-points" data-bs-toggle="pill" type="button" role="tab" data-bs-target="#mode-strategic-points" aria-controls="mode-strategic-points" aria-selected="false")
+                                        svg.bi.pe-none(width='26' height='26' role='img' aria-label='Strategic points')
+                                            use(xlink:href='#flag')
                         div.dropdown.border-top
                             a.d-flex.align-items-center.justify-content-center.p-3.link-dark.text-decoration-none.dropdown-toggle(href='#' id="dropdownRobot" data-bs-toggle='dropdown' aria-expanded='false')
                                 svg.bi(width='24' height='24' role='img')
@@ -381,6 +404,34 @@ html
                                                 small 1×
                                                 input.form-range.mx-2(type="range" name="zoomRange" min="1" max="4" step="1" id="zoomRange" value=1)
                                                 small 4×
+                                // Ping
+                                div.tab-pane.fade(id="mode-ping" role="tabpanel" aria-labelledby="ping-tab")
+                                    div.text-center.border-bottom.py-2
+                                        svg.bi.me-2(width='24' height='24' role='img')
+                                            use(xlink:href='#crosshair')
+                                        span.h2 Ping
+                                    div.d-grid.gap-2.pt-2
+                                        button(id='pingBtn' type='button').btn.btn-primary
+                                            svg.bi(width='16' height='16' role='img')
+                                                use(xlink:href='#crosshair')
+                                            |   Ping a location
+                                        button(id='clearPingBtn' type='button').btn.btn-danger
+                                            svg.bi(width='16' height='16' role='img')
+                                                use(xlink:href='#x-circle')
+                                            |   Remove pings
+                                // Strategic points
+                                div.tab-pane.fade(id="mode-strategic-points" role="tabpanel" aria-labelledby="strategic-points-tab")
+                                    div.text-center.border-bottom.py-2
+                                        svg.bi.me-2(width='24' height='24' role='img')
+                                            use(xlink:href='#flag')
+                                        span.h2 Strategic Points
+                                    div.d-grid.pt-2
+                                        ul.list-group.border-bottom-0(id='strategicPointsList')
+                                        ul.list-group.border-bottom
+                                            li.list-group-item.d-flex.justify-content-center
+                                                div.d-flex.gap-2
+                                                    button.btn.btn-danger(id="defuseBtn" style="display:none") Defuse
+                                
                         a.collapse-bar.d-flex.justify-content-center.py-2.mx-5(data-bs-toggle='collapse' data-bs-target='#omnibox-content' role='button' aria-expanded='false' aria-controls='omnibox-content')
                             svg(xmlns='http://www.w3.org/2000/svg' width='12rem' height='8px')
                                 rect(rx='4' ry='4' width='100%' height='8' fill='#adb5bd' fill-opacity='.8')

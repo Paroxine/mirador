@@ -401,6 +401,7 @@ class Robot {
         this.guide;
         this.route;
         this.area;
+        this.pings;
     }
 }
   

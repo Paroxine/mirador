@@ -71,6 +71,17 @@
         $('#omnibox-content').collapse('show')
         navigator.vibrate(HAPTIC_VIBRATION_TIME);
     })
+    const pingTab = document.getElementById('ping')
+    pingTab.addEventListener('shown.bs.tab', event => {
+        document.location.hash = 'ping';
+        mode = 5;
+    })
+    const strategicPointsTab = document.getElementById('strategic-points')
+    strategicPointsTab.addEventListener('shown.bs.tab', event => {
+        document.location.hash = 'strategic-points';
+        mode = 7;
+    })
+
     controlTab.addEventListener('hide.bs.tab', event => {
         joystickElements.forEach(element => {
             element.style.display = 'none';
@@ -462,6 +473,7 @@
             updateStreamMethod(status.stream_method);
             robotStatus.stream_method = status.stream_method;
         }
+        updateServerStrategicPoints(status.mission_context.strategic_points);
 
         robotStatus = status;
     });
@@ -735,12 +747,221 @@
         let elevationRange = document.getElementById("elevationRange");
         publishGimbal(elevationRange.value)
     });
+    
+    // PING
 
+    let pings = new Points(map);
+    let pingRemoveFirstPoint;
+    let pingRemoveRect;
+
+    function pingLocation(event) {
+        addPing(event.latlng.lat, event.latlng.lng);
+        updateServerPings();
+    }    
+
+    function updateServerPings() {
+        socket.emit("updatePings", pings.points.map( x => ({ lat: x.latitude, lng: x.longitude}) ));
+    }
+
+    function addPing(lat, lng) {
+        let point = pings.add(lat, lng);
+        point.marker.on('move', event => {
+            point.latitude = event.latlng.lat;
+            point.longitude = event.latlng.lng;
+            $('#' + point.id + ' small').text(point.latitude.toFixed(5) + ', ' + point.longitude.toFixed(5))
+            updateServerPings();
+        });
+        return point;
+    }
+
+    function removePings(event) {
+        let point = [ event.latlng.lat, event.latlng.lng ];
+        if (pingRemoveFirstPoint) {
+            let bounds = [pingRemoveFirstPoint, point];
+            pingRemoveFirstPoint = undefined;
+            for (point of pings.points) {
+                if (pointInBounds(point, bounds)) {
+                    pings.remove(point.id);
+                    point.marker.remove();
+                }
+            }
+            pingRemoveRect.remove();
+            updateServerPings();
+        } else {
+            pingRemoveFirstPoint = point;
+        }
+    }
+
+    function pointInBounds(point, bounds) {
+        return  (point.latitude  - bounds[0][0]) * (point.latitude  - bounds[1][0]) <= 0 &&
+                (point.longitude - bounds[0][1]) * (point.longitude - bounds[1][1]) <= 0;
+    }
+
+    $('#pingBtn').on('click', () => { mode = 5; })
+
+    $('#clearPingBtn').on('click', () => { mode = 6; });
     $('#altitudeInput').change(function () {
         let altitudeInput = document.getElementById("altitudeInput")
         altitudeInputValue = altitudeInput.value
     });
 
+    // STRATEGIC POINTS
+
+    let strategic_points = {};
+    let selected_sp;
+
+    $("#defuseBtn").on('click', defuseStrategicPoint);
+
+    function defuseStrategicPoint() {
+        let before_after = { 0: 1, 1: 0, 2:2 }
+        selected_sp.data.status = before_after[selected_sp.data.status];
+        updateDefuseBtn();
+        drawStrategicPoint(selected_sp);
+        updateServerStrategicPoints(Object.values(strategic_points).map(x=>x.data));
+        return;
+    }
+
+    function updateDefuseBtn() {
+        let text = { 0: "Arm", 1: "Defuse", 2: "Unalterable" };
+        let color = { 0: "btn-danger", 1: "btn-success", 2: "btn-secondary" };
+        let colors = Object.values(color);
+        let btn = $("#defuseBtn");
+        console.log(btn);
+        if (!selected_sp) btn.hide();
+        else {
+            colors.forEach(c => btn.removeClass(c));
+            btn.addClass(color[selected_sp.data.status]);
+            btn.html(text[selected_sp.data.status]).show();
+        }
+    }
+    
+    function defaultMarkerIcon(color) {
+        return L.divIcon({
+            html:  `<svg width="20" height="20" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <circle fill="#eeeeee" stroke="#cccccc" stroke-width="1" cx="12" cy="12" r="10">
+                        </circle>
+                        <circle fill=${color} cx="12" cy="12" r="6">
+                        </circle>
+                    </svg>`,
+            className: "",
+            iconSize: [20, 20]
+        });
+    }
+
+    function updateServerStrategicPoints(points) {
+        socket.emit("updateStrategicPoints", points);
+    }
+
+    function updateStrategicPoints(new_points) {
+        for (let point of new_points) {
+            let id = point.id.toString();
+            if (!Object.keys(strategic_points).includes(id)) {
+                strategic_points[id] = {
+                    data: point,
+                    hidden: false
+                }
+            } else {
+                strategic_points[point.id].data = point;
+            }
+        }
+        for (let pid in strategic_points) drawStrategicPoint(strategic_points[pid]);
+        updateStrategicPointsHTML();
+    }
+
+    function drawStrategicPoint(point) {
+        if (point.hidden) return;
+
+        let color = { 0: "green", 1: "red", 2: "orange" }[point.data.status];
+        let latlng = [point.data.position.latitude, point.data.position.longitude];
+        let circle_options =  { radius: point.data.radius, color: color, weight: 3 };
+        let marker_options = { icon : defaultMarkerIcon(color) };
+        if (point.highlight) circle_options.weight += 2;
+
+        if (!point.circle || point.circle.options != circle_options) {
+            if (point.circle) map.removeLayer(point.circle);
+            point.circle = L.circle(latlng, circle_options);
+            point.circle.on("click", () => selectStrategicPoint(point.data.id));
+            map.addLayer(point.circle);
+        }
+        if (!point.marker || point.marker.options != marker_options) {
+            if (point.marker) map.removeLayer(point.marker);
+            point.marker = L.marker(latlng, marker_options);
+            if (selected_sp == point) map.addLayer(point.marker);
+        }
+    }
+
+    function hideStrategicPoint(point) {
+        point.hidden = !point.hidden;
+        if (point.hidden) {
+            if (point.circle) map.removeLayer(point.circle);
+            if (point.marker) map.removeLayer(point.marker);
+        } else drawStrategicPoint(point);
+    }
+
+    function selectStrategicPoint(pid) {
+        if (selected_sp) { //deselect
+            $(`#strategicPointsList #${selected_sp.data.id}`).removeClass("selected");
+            map.removeLayer(selected_sp.marker);
+            if (selected_sp.data.id == pid) { //if already selected, don't reselect again
+                selected_sp = undefined;
+                updateDefuseBtn();
+                return;
+             }
+        }
+        selected_sp = strategic_points[pid];
+        $(`#strategicPointsList #${pid}`).addClass("selected");
+        map.addLayer(selected_sp.marker);
+        updateDefuseBtn();
+    }
+
+    function strategicPointHightlight(pid, highlight = true) {
+        let point = strategic_points[pid];
+        point.highlight = highlight;
+        drawStrategicPoint(point);
+    }
+
+    function updateStrategicPointsHTML() {
+        $('#strategicPointsList').html("");
+        let i=1;
+        for (let pid in strategic_points) {
+            let point = strategic_points[pid];
+            let icon = point.hidden ? "eye-closed" : "eye";
+            $('#strategicPointsList').append(`
+                <li class="list-group-item px-2" id="${pid}">
+                    <div class="align-items-center d-flex gap-2">    
+                        <svg width="20" height="20" role="img">
+                            <use xlink:href="#vertex-dot"></use>
+                        </svg>
+                        <span class="flex-grow-1">${pid.slice(0,8)}</span>
+                        <small class="fw-light me-1">${point.data.position.latitude.toFixed(5)}, ${point.data.position.longitude.toFixed(5)}</small>
+                        <button class="btn btn-sm hide-sp-btn p-0" type="button" style="display: inline;">
+                            <svg class="fill-current" width="20" height="20" role="img">
+                                <use xlink:href="#${icon}"></use>
+                            </svg>
+                        </button>
+                    </div>
+                </li>    
+            `);
+            i++;
+        }
+        $("#strategicPointsList .hide-sp-btn").on('click', event => {
+            let pid = event.currentTarget.parentElement.parentElement.id;
+            let point = strategic_points[pid];
+            hideStrategicPoint(point);
+            let icon = point.hidden ? "eye-closed" : "eye";
+            event.currentTarget.children[0].children[0].setAttribute("xlink:href",`#${icon}`);
+        });
+        $("#strategicPointsList li").on('click', event => {
+            selectStrategicPoint(event.currentTarget.id);
+        });
+        $("#strategicPointsList li").on('mouseenter', event => {
+            strategicPointHightlight(event.currentTarget.id, true);
+        });
+        $("#strategicPointsList li").on('mouseleave', event => {
+            strategicPointHightlight(event.currentTarget.id, false);
+        });
+        if (selected_sp) $(`#strategicPointsList li#${selected_sp.data.id}`).addClass("selected");
+    }
     $('#altitudeRange').change(function () {
         let altitudeInput = document.getElementById("altitudeInput")
         altitudeInputValue = altitudeInput.value
@@ -843,6 +1064,19 @@
         if (addingArea && mode === 3) {
             pointVertex(event);
         };
+
+        if (mode == 5) pingLocation(event);
+        if (mode == 6) removePings(event); 
+    });
+
+    map.on('mousemove', (event) => {
+        if (mode == 6 && typeof(pingRemoveFirstPoint) != "undefined") {
+            let latlng = [event.latlng.lat, event.latlng.lng];
+            let bounds = [pingRemoveFirstPoint, latlng];
+            if (typeof(pingRemoveRect) != "undefined") pingRemoveRect.remove();
+            pingRemoveRect = L.rectangle(bounds, {color: "red", weight: 1});
+            pingRemoveRect.addTo(map);
+        }
     })
 
     // SETTINGS
@@ -931,6 +1165,16 @@
         robot.color = old_robot.color;
         toast('Welcome back on Mirador!');
     });
+      
+    socket.on("updatePings", points => {
+        pings.clear();
+        for (let id of Object.keys(points)) {
+            let point = points[id];
+            addPing(point.lat, point.lng);
+        } 
+    });
+
+    socket.on("updateStrategicPoints", updateStrategicPoints);
 
     let peerConnection;
     const webrtc_config = {
@@ -1102,17 +1346,34 @@
                 break;
             default:
         }
+        if (status.mode !== robotStatus.mode) {
+            updateCurrentMission(status.mode, status.mission);
+            updateMode(status.mode);
+        }
+        if (status.signal_quality !== robotStatus.signal_quality) {
+            updateSignal(status.signal_quality);
+        }
+        if (status.state_of_charge !== robotStatus.state_of_charge) {
+            updateBatteryCharge(status.state_of_charge);
+        }
+        if (status.is_running !== robotStatus.is_running) {
+            updateIsRunning(status.is_running);
+        }
+        if (status.flight_status !== robotStatus.flight_status) {
+            updateFlightStatus(status.flight_status);
+        }
+        if (status.e_stop !== robotStatus.e_stop) {
+            updateEStop(status.e_stop);
+        }
+        if (status.camera_elevation !== robotStatus.camera_elevation) {
+            updateCameraElevtaion(status.camera_elevation);
+        }
+        if (status.camera_zoom !== robotStatus.camera_zoom) {
+            updateCameraZoom(status.camera_zoom);
+        }
+        robotStatus = status;
     }
-    /*
-    if (robotStatus.stream_method == 2) {
-        console.log("go to video");
-        const streamImage = document.getElementById('image-stream-display');
-        videoStreamListener.subscribe(function (message) {
-            streamImage.src = "data:image/jpg;base64," + message.data;
-        });
-    }
-    */
-    
+
     function publishMission(mission) {
         let currentTime = new Date();
         let secs = Math.floor(currentTime.getTime() / 1000);
@@ -1152,9 +1413,8 @@
     }
 
     function publishCmdVel() {
-        let twistMessage
-
-        if (robot.robot_class == "anafi") {
+        let twistMessage;
+        if (robotModel === "uav") {
             twistMessage = new ROSLIB.Message({
                 linear: {
                     x: positionJoystickRight.y * 100,

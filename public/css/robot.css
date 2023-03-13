@@ -328,6 +328,15 @@ main {
     display: block;
     animation: wave-animate 4s 2s infinite ease-in;
   }
+
+#strategicPointsList li.selected {
+    border-width: 3px;
+    border-color: #969696
+}
+
+#strategicPointsList li:hover {
+    background-color: #d6d6d6;
+}
   
 @keyframes wave-animate {
     0% {
