@@ -1346,32 +1346,6 @@
                 break;
             default:
         }
-        if (status.mode !== robotStatus.mode) {
-            updateCurrentMission(status.mode, status.mission);
-            updateMode(status.mode);
-        }
-        if (status.signal_quality !== robotStatus.signal_quality) {
-            updateSignal(status.signal_quality);
-        }
-        if (status.state_of_charge !== robotStatus.state_of_charge) {
-            updateBatteryCharge(status.state_of_charge);
-        }
-        if (status.is_running !== robotStatus.is_running) {
-            updateIsRunning(status.is_running);
-        }
-        if (status.flight_status !== robotStatus.flight_status) {
-            updateFlightStatus(status.flight_status);
-        }
-        if (status.e_stop !== robotStatus.e_stop) {
-            updateEStop(status.e_stop);
-        }
-        if (status.camera_elevation !== robotStatus.camera_elevation) {
-            updateCameraElevtaion(status.camera_elevation);
-        }
-        if (status.camera_zoom !== robotStatus.camera_zoom) {
-            updateCameraZoom(status.camera_zoom);
-        }
-        robotStatus = status;
     }
 
     function publishMission(mission) {
