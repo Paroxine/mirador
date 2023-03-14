@@ -171,6 +171,11 @@ class Guide extends Points {
         this.points.push(point);
         return point;
     }
+
+    update(latitude, longitude) {
+        this.points[0].latitude = latitude;
+        this.points[0].longitude = longitude;
+    }
 }
 
 class Route extends Points {

@@ -587,7 +587,9 @@
         navigator.vibrate(HAPTIC_VIBRATION_TIME);
         let point = robot.guide.add(event.latlng.lat, event.latlng.lng);
         point.marker.on('move', function (event) {
+            robot.guide.update(event.latlng.lat, event.latlng.lng);
             publishMission(robot.guide);
+
         })
         publishMission(robot.guide);
         document.getElementById('pointGuideBtn').classList.add('disabled');
