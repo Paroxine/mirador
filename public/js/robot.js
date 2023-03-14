@@ -236,6 +236,29 @@
                     iconSize: [48, 48]
                 });
                 return robotIcon;;
+                case "tundra":
+                    robotIcon = L.divIcon({
+                        html: `
+                        <svg width="48" height="48" viewBox="-64 -64 128 128" xmlns="http://www.w3.org/2000/svg">
+                            <filter id="shadow">
+                                <feDropShadow dx="0" dy="0" stdDeviation="3"/>
+                            </filter>
+                            <g filter="url(#shadow)">
+                                <path d="M 8 -24 C 16 -24 16 -24 24 -32 L 28 -36 A 4 4 90 0 1 36 -28 L 32 -24 C 24 -16 24 -16 24 -8 L 24 8 C 24 16 24 16 32 24 L 36 28 A 4 4 90 0 1 28 36 L 24 32 C 16 24 16 24 8 24 L -8 24 C -16 24 -16 24 -24 32 L -28 36 A 4 4 90 0 1 -36 28 L -32 24 C -24 16 -24 16 -24 8 L -24 -8 C -24 -16 -24 -16 -32 -24 L -36 -28 A 4 4 90 0 1 -28 -36 L -24 -32 C -16 -24 -16 -24 -8 -24 Z" stroke="` + CONTRAST_COLOR + `" fill="` + ROBOT_COLOR + `" stroke-width="4"></path>
+                                <rect x="-6" y="-30" width="12" height="10" stroke="` + CONTRAST_COLOR + `" fill="` + ROBOT_COLOR + `" stroke-width="4"></rect>
+                                <rect x="-8" y="-23" width="16" height="12" stroke="` + CONTRAST_COLOR + `" fill="#d9d9d9" stroke-width="2"></rect>
+                                <circle cx="0" cy="0" r="6" stroke="` + CONTRAST_COLOR + `" fill="#3CC800" stroke-width="2"></circle>
+                            </g>
+                            <circle cx="-32" cy="-32" r="20" stroke="` + CONTRAST_COLOR + `" fill="#888888" fill-opacity=".5" stroke-width="4"></circle>
+                            <circle cx="32" cy="-32" r="20" stroke="` + CONTRAST_COLOR + `" fill="#888888" fill-opacity=".5" stroke-width="4"></circle>
+                            <circle cx="32" cy="32" r="20" stroke="` + CONTRAST_COLOR + `" fill="#888888" fill-opacity=".5" stroke-width="4"></circle>
+                            <circle cx="-32" cy="32" r="20" stroke="` + CONTRAST_COLOR + `" fill="#888888" fill-opacity=".5" stroke-width="4"></circle>
+                            <polygon points="0,-62 -12,-50 12,-50" stroke="` + CONTRAST_COLOR + `" fill="#000000" stroke-width="2"></polygon>
+                        </svg>`,
+                        className: "",
+                        iconSize: [48, 48]
+                    });
+                    return robotIcon;;
             case "husky":
                 robotIcon = L.divIcon({
                     html: `
@@ -371,8 +394,8 @@
         messageType: 'std_msgs/Empty'
     });
 
-    if (robot.robot_class == 'anafi') {
-        console.log('Anafi logged');
+    if (robot.robot_class == 'anafi' || robot.robot_class == 'tundra') {
+        console.log('Drone logged');
 
         var cmdVelPublisher = new ROSLIB.Topic({
             ros: ros,

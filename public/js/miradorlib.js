@@ -437,6 +437,12 @@ class Anafi extends UAV {
     }
 }
 
+class Tundra extends UAV {
+    constructor(name, address, port, color) {
+        super('tundra', name, address, port, color);
+    }
+}
+
 if (typeof module !== 'undefined') {
-    module.exports = { Route, Exploration, Missions, Robot, Husky, Warthog, Anafi };
+    module.exports = { Route, Exploration, Missions, Robot, Husky, Warthog, Anafi, Tundra };
 }
