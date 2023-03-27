@@ -50,9 +50,6 @@ class StratPoint {
     }
     
     select() {
-        console.log("Selecting");
-        console.log(this);
-
         if (selected_sp) selected_sp.deselect();
         if (selected_sp && selected_sp.id == this.id) { //if already selected, don't reselect again
             selected_sp = undefined;
