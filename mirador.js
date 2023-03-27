@@ -90,29 +90,27 @@ io.on("connection", (socket) => {
     
     //STRATEGIC POINTS
     socket.emit("updateStrategicPoints", strategic_points);
-    socket.on("updateStrategicPoints", robot_points => {
+    socket.on("newStratPoints", robot_points => {
         let i = 0;
-        for (let point of robot_points) {   
-            let known = false;
-            for (let known_point of strategic_points) {
-                if (samePosition(point.position, known_point.position)) {
-                    known = true;
-                    known_point.status = point.status;
-                    break;
-                }
-            }
-            if (!known) {
-                point.id = strategic_points.length;
-                console.log(`New strategic point at ${point.position.latitude},${point.position.longitude}`);
-                strategic_points.push(point);
-            }
+        let new_points = robot_points.filter(x => !Object.values(strategic_points).some(y => samePosition(x.position, y.position)));
+        for (let new_point of new_points) {  
+            new_point.id = strategic_points.length; 
+            strategic_points.push(new_point);
+            console.log(`New strategic point at ${new_point.position.latitude},${new_point.position.longitude}`);
             i++;
         }
-        console.log("strats");
-        console.log(strategic_points);
 
         io.emit("updateStrategicPoints", strategic_points);
     });
+    socket.on("stratPointStatus", robot_point => {
+        console.log("straPointStatus");
+        let sp = strategic_points.find(x => x.id == robot_point.id);
+        if (sp) {
+            sp.status = robot_point.status;
+            console.log("updating a status");
+        }
+        io.emit("updateStrategicPoints", strategic_points);
+    })
 
     socket.on("disconnect", () => {
         if (socket.id in robots) {
