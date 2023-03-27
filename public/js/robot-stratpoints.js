@@ -35,7 +35,7 @@ class StratPoint {
 
         if (!this.circle || this.circle.options != circle_options) {
             this.circle = L.circle(latlng, circle_options);
-            this.circle.on("click", () => selectStrategicPoint(this.id));
+            this.circle.on("click", () => this.select());
             map.addLayer(this.circle);
         }
         if (!this.marker || this.marker.options != marker_options) {
@@ -50,9 +50,17 @@ class StratPoint {
     }
     
     select() {
-        selected_sp = strategic_points[pid];
-        $(`#strategicPointsList #${pid}`).addClass("selected");
-        map.addLayer(selected_sp.marker);
+        console.log("Selecting");
+        console.log(this);
+
+        if (selected_sp) selected_sp.deselect();
+        if (selected_sp && selected_sp.id == this.id) { //if already selected, don't reselect again
+            selected_sp = undefined;
+        } else {
+            selected_sp = this;
+            $(`#strategicPointsList #${this.id}`).addClass("selected");
+            map.addLayer(this.marker);
+        }
         updateStratPointSelection();
     }
 
@@ -145,7 +153,7 @@ function updateStratPointSelection() {
         colors.forEach(c => btn.removeClass(c));
         btn.addClass(color[selected_sp.status]);
         btn.html(text[selected_sp.status]);
-        $("#stratPointString").html(selected_sp.message);
+        str.html(selected_sp.message);
     }
 }
 
@@ -162,14 +170,8 @@ function defaultMarkerIcon(color) {
     });
 }
 
-function selectStrategicPoint(spid) {
-    if (selected_sp) selected_sp.deselect();
-    if (selected_sp && selected_sp.id == spid) { //if already selected, don't reselect again
-        selected_sp = undefined;
-    } else {
-        selected_sp = stratpoints.data[spid];
-    }
-    updateStratPointSelection();
+function selectById(spid) {
+    stratpoints.data[spid].select();
 }
 
 function updateStrategicPointsHTML() {
@@ -204,7 +206,7 @@ function updateStrategicPointsHTML() {
         event.currentTarget.children[0].children[0].setAttribute("xlink:href", `#${icon}`);
     });
     $("#strategicPointsList li").on('click', event => {
-        selectStrategicPoint(event.currentTarget.id);
+        selectById(event.currentTarget.id);
     });
     $("#strategicPointsList li").on('mouseenter', event => {
         stratpoints.data[event.currentTarget.id].setHighlight(true);
