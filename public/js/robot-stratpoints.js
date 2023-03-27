@@ -1,10 +1,11 @@
 class StratPoint {
 
-    constructor(id, position, status, radius) {
+    constructor(id, position, status, radius, message) {
         this.id = id;
         this.position = position;
         this.status = status;
         this.radius = radius;
+        this.message = message;
 
         this.hidden = false;
         this.highlight = false;
@@ -52,7 +53,7 @@ class StratPoint {
         selected_sp = strategic_points[pid];
         $(`#strategicPointsList #${pid}`).addClass("selected");
         map.addLayer(selected_sp.marker);
-        updateDefuseBtn();
+        updateStratPointSelection();
     }
 
     deselect() {
@@ -96,14 +97,15 @@ class StratPointsLibrary {
         let data = new_points.map(x => ({
             position: x.position,
             status: x.status,
-            radius: x.radius
+            radius: x.radius,
+            message: x.message
         }));
         socket.emit("newStratPoints", data);
         this.updateHTML();
     }
 
     updateFromServer(server_points) {
-        server_points = server_points.map(x => new StratPoint(x.id, x.position, x.status, x.radius));
+        server_points = server_points.map(x => new StratPoint(x.id, x.position, x.status, x.radius, x.message));
         for (let sp of server_points) {
             if (this.isKnown(sp)) this.data[sp.id].status = sp.status;
             else this.data[sp.id] = sp;
@@ -123,20 +125,27 @@ const POSITION_MIN_DISTANCE = 0.0001;
 
 function defuseStrategicPoint() {
     selected_sp.defuse();
-    updateDefuseBtn();
+    updateStratPointSelection();
     return;
 }
 
-function updateDefuseBtn() {
+function updateStratPointSelection() {
     let text = { 0: "Arm", 1: "Defuse", 2: "Unalterable" };
     let color = { 0: "btn-danger", 1: "btn-success", 2: "btn-secondary" };
     let colors = Object.values(color);
+
     let btn = $("#defuseBtn");
-    if (!selected_sp) btn.hide();
-    else {
+    let str = $("#stratPointString");
+    let info = $("#stratPointInfo");
+
+    if (!selected_sp) {
+        info.hide();
+    } else {
+        info.show();
         colors.forEach(c => btn.removeClass(c));
         btn.addClass(color[selected_sp.status]);
-        btn.html(text[selected_sp.status]).show();
+        btn.html(text[selected_sp.status]);
+        $("#stratPointString").html(selected_sp.message);
     }
 }
 
@@ -160,8 +169,7 @@ function selectStrategicPoint(spid) {
     } else {
         selected_sp = stratpoints.data[spid];
     }
-    console.log(selected_sp);
-    updateDefuseBtn();
+    updateStratPointSelection();
 }
 
 function updateStrategicPointsHTML() {
@@ -216,7 +224,7 @@ function setup(_socket, _map) {
 }
 
 function updateStratPointsFromRobot(robot_points) {
-    robot_points = robot_points.map(x => new StratPoint(undefined,x.position,x.status,x.radius));
+    robot_points = robot_points.map(x => new StratPoint(undefined,x.position,x.status,x.radius,x.message));
     stratpoints.updateFromRobot(robot_points);
 }
 

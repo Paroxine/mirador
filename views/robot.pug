@@ -427,10 +427,12 @@ html
                                         span.h2 Strategic Points
                                     div.d-grid.pt-2
                                         ul.list-group.border-bottom-0(id='strategicPointsList')
-                                        ul.list-group.border-bottom
+                                        ul.list-group.border-bottom(id="stratPointInfo" style="display:none")
                                             li.list-group-item.d-flex.justify-content-center
                                                 div.d-flex.gap-2
-                                                    button.btn.btn-danger(id="defuseBtn" style="display:none") Defuse
+                                                    button.btn.btn-danger(id="defuseBtn") Defuse
+                                            li.list-group-item.d-flex.justify-content-center
+                                                div.d-flex.gap-2(id="stratPointString") 
                                 
                         a.collapse-bar.d-flex.justify-content-center.py-2.mx-5(data-bs-toggle='collapse' data-bs-target='#omnibox-content' role='button' aria-expanded='false' aria-controls='omnibox-content')
                             svg(xmlns='http://www.w3.org/2000/svg' width='12rem' height='8px')

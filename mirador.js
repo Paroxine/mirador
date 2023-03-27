@@ -103,7 +103,6 @@ io.on("connection", (socket) => {
         io.emit("updateStrategicPoints", strategic_points);
     });
     socket.on("stratPointStatus", robot_point => {
-        console.log("straPointStatus");
         let sp = strategic_points.find(x => x.id == robot_point.id);
         if (sp) {
             sp.status = robot_point.status;
@@ -114,7 +113,7 @@ io.on("connection", (socket) => {
 
     socket.on("disconnect", () => {
         if (socket.id in robots) {
-            //console.log("Logout :", robots);
+            console.log("Logout :", robots);
             // Send a logout message to other robots
             socket.to("robots").emit("logout", robots[socket.id]);
             socket.to(robots[socket.id].address).emit("disconnectWatcher", socket.id);
