@@ -162,6 +162,15 @@ html
                 circle(cx='16', cy='16', r='10', stroke='#606060', fill='#888888', fill-opacity='.5', stroke-width='1')
                 circle(cx='-16', cy='16', r='10', stroke='#606060', fill='#888888', fill-opacity='.5', stroke-width='1')
                 circle(cx='0' cy='0' r='3' stroke='#606060' fill='#3CC800' stroke-width='1')
+            symbol#tundra(viewbox='-27 -27 54 54')
+                path(d='M 4 -12 C 8 -12 8 -12 12 -16 L 14 -18 A 2 2 90 0 1 18 -14 L 16 -12 C 12 -8 12 -8 12 -4 L 12 4 C 12 8 12 8 16 12 L 18 14 A 2 2 90 0 1 14 18 L 12 16 C 8 12 8 12 4 12 L -4 12 C -8 12 -8 12 -12 16 L -14 18 A 2 2 90 0 1 -18 14 L -16 12 C -12 8 -12 8 -12 4 L -12 -4 C -12 -8 -12 -8 -16 -12 L -18 -14 A 2 2 90 0 1 -14 -18 L -12 -16 C -8 -12 -8 -12 -4 -12 Z', stroke='#606060', fill=`${color}`, stroke-width='1')
+                rect(x='-4', y='-12', width='8', height='6', stroke='#606060', fill='#D9D9D9', stroke-width='1')
+                rect(x='-3', y='-15', width='6', height='4', stroke='#000000', fill=`${color}`, stroke-width='1')
+                circle(cx='-16', cy='-16', r='10', stroke='#606060', fill='#888888', fill-opacity='.5', stroke-width='1')
+                circle(cx='16', cy='-16', r='10', stroke='#606060', fill='#888888', fill-opacity='.5', stroke-width='1')
+                circle(cx='16', cy='16', r='10', stroke='#606060', fill='#888888', fill-opacity='.5', stroke-width='1')
+                circle(cx='-16', cy='16', r='10', stroke='#606060', fill='#888888', fill-opacity='.5', stroke-width='1')
+                circle(cx='0' cy='0' r='3' stroke='#606060' fill='#3CC800' stroke-width='1')
             symbol#husky(viewbox='-27 -27 54 54')
                 rect(x='-16', y='-24', width='32', height='48', stroke='#606060', fill=`${color}`, stroke-width='1')
                 rect(x='-16', y='-24', width='32', height='8', stroke='#606060', fill='#ffffff', fill-opacity='0.4', stroke-width='1')
@@ -329,12 +338,12 @@ html
                                         form.pt-2.uav(onsubmit='return false;')
                                             div.input-group.align-items-center
                                                 span.input-group-text.pe-5 Flight altitude
-                                                input.form-control(type="text" name="altitudeInput" id="altitudeInput" oninput="this.form.altitudeRange.value=this.value" value="3")
+                                                input.form-control(type="text" name="altitudeInput" id="altitudeInput" oninput="this.form.altitudeRange.value=this.value" value="10")
                                                 span.input-group-text m
                                             div.d-flex.align-items-center.mt-2
                                                 small 0
-                                                input.form-range.mx-2(type="range" name="altitudeRange" min="0" max="30" step="2" id="altitudeRange" oninput="this.form.altitudeInput.value=this.value;" value=2)
-                                                small 30m
+                                                input.form-range.mx-2(type="range" name="altitudeRange" min="0" max="40" step="2" id="altitudeRange" oninput="this.form.altitudeInput.value=this.value;" value=2)
+                                                small 40m
                                         button.btn.btn-primary.pb-2.mt-2(id='sendRouteBtn' type='button') Confirm route
                                 // Exploration
                                 div.tab-pane.fade(id="mode-exploration" role="tabpanel" aria-labelledby="exploration-tab")

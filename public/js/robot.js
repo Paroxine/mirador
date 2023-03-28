@@ -386,6 +386,75 @@ if (robot.robot_class == 'anafi') {
     console.log('Anafi logged');
 
     var cmdVelPublisher = new ROSLIB.Topic({
+=======
+
+    ros.on('connection', function () {
+        clearInterval(rosReconnectLoop);
+        console.log('Connected to ROS bridge with success');
+        toast('Connected to ' + robot.name);
+    });
+
+    ros.on('error', function (error) {
+        updateSignal(0);
+        toast('Error connecting to ROS bridge');
+        connectToRos();
+    });
+
+    // Subscribers
+
+    var robotStatusListener = new ROSLIB.Topic({
+        ros: ros,
+        name: '/mirador/status',
+        messageType: 'mirador_driver/Status'
+        //messageType: 'robot_sim/Status'
+    });
+
+    var videoStreamListener = new ROSLIB.Topic({
+        ros: ros,
+        name: streamTopic,
+        //"/zed_node/rgb/image_rect_color/compressed",
+        messageType: 'sensor_msgs/CompressedImage'
+    });
+
+    // Publishers
+
+    var missionPublisher = new ROSLIB.Topic({
+        ros: ros,
+        name: '/mirador/mission',
+        messageType: 'mirador_driver/Mission'
+    });
+
+    var launchPublisher = new ROSLIB.Topic({
+        ros: ros,
+        name: '/mirador/launch',
+        messageType: 'std_msgs/Empty'
+    });
+
+    var abortPublisher = new ROSLIB.Topic({
+        ros: ros,
+        name: '/mirador/abort',
+        messageType: 'std_msgs/Empty'
+    });
+
+    if (robot.robot_class == 'anafi' || robot.robot_class == 'tundra') {
+        console.log('Drone logged');
+
+        var cmdVelPublisher = new ROSLIB.Topic({
+            ros: ros,
+            name: 'mirador/cmd_vel',
+            messageType: 'geometry_msgs/Twist'
+        });
+    } else {
+        console.log('Husky Logged');
+
+        var cmdVelPublisher = new ROSLIB.Topic({
+            ros: ros,
+            name: 'twist_marker_server/cmd_vel',
+            messageType: 'geometry_msgs/Twist'
+        });
+    };
+
+    var takeOffLandPublisher = new ROSLIB.Topic({
         ros: ros,
         name: 'mirador/cmd_vel',
         messageType: 'geometry_msgs/Twist'
@@ -569,10 +638,15 @@ $('#clearGuideBtn').on('click', function () {
     navigator.vibrate(HAPTIC_VIBRATION_TIME);
 });
 
+
 function pointGuide(event) {
     navigator.vibrate(HAPTIC_VIBRATION_TIME);
     let point = robot.guide.add(event.latlng.lat, event.latlng.lng);
     point.marker.on('move', function (event) {
+        robot.guide.update(event.latlng.lat, event.latlng.lng);
+        publishMission(robot.guide);
+
+    })
         publishMission(robot.guide);
     })
     publishMission(robot.guide);
@@ -1144,10 +1218,32 @@ function updateIsRunning(is_running) {
     if (is_running) {
         isRunningElement.style.setProperty("display", "inline-block");
     }
+
     else {
         isRunningElement.style.setProperty("display", "none");
     }
 }
+
+function updateStreamMethod(method) {
+  switch (method) {
+      case 0:
+          hideImageElements();
+          break;
+      case 1:
+          hideImageElements();
+          break;
+      case 2:
+          hideVideoElements();
+          console.log("Topic Video on topic: "+ videoStreamListener.name);
+          const streamImage = document.getElementById('image-stream-display');
+          videoStreamListener.subscribe(function (message) {
+              streamImage.src = "data:image/jpg;base64," + message.data;
+          });
+
+          break;
+      default:
+}
+
 
 function updateEStop(e_stop) {
     let eStop = document.getElementById("e-stop");
