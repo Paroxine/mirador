@@ -108,8 +108,8 @@ io.on("connection", (socket) => {
             }
             i++;
         }
-        console.log("strats");
-        console.log(strategic_points);
+        //console.log("strats");
+        //console.log(strategic_points);
 
         io.emit("updateStrategicPoints", strategic_points);
     });
