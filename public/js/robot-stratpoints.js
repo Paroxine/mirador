@@ -44,7 +44,23 @@ class StratPoint {
         }
     }
 
+    sameId(other) {
+        //Check if the ID is different or if the trap is a POI
+        console.log((this.id != other.id) || (other.id == -1));
+        if((this.id != other.id)){
+            //Not the same id
+            return 0;
+        }else{
+            if(this.id == -1){
+                return samePosition(other);
+            }
+            //same
+            return 1;
+        }
+    }
+
     samePosition(other) {
+        //same
         return Math.abs(this.position.longitude - other.position.longitude) < POSITION_MIN_DISTANCE &&
             Math.abs(this.position.latitude - other.position.latitude) < POSITION_MIN_DISTANCE / 2;
     }
@@ -85,7 +101,11 @@ class StratPointsLibrary {
     }
 
     isKnown(point) {
-        return Object.values(this.data).some(x => x.samePosition(point));
+        //Check on the unicity of the position
+        //return Object.values(this.data).some(x => x.samePosition(point));
+
+        //Check on the unicity of the ID
+        return Object.values(this.data).some(x => x.sameId(point));
     }
 
     unknownPoints(points) {
@@ -112,6 +132,7 @@ class StratPointsLibrary {
     updateFromServer(server_points) {
         server_points = server_points.map(x => new StratPoint(x.id, x.position, x.status, x.radius, x.message));
         for (let sp of server_points) {
+            //console.log(this.data[sp.id]);
             if (this.isKnown(sp)) this.data[sp.id].status = sp.status;
             else this.data[sp.id] = sp;
         }
@@ -195,9 +216,10 @@ function updateStrategicPointsHTML() {
         `);
         i++;
     }
+
     $("#strategicPointsList .hide-sp-btn").on('click', event => {
         let pid = event.currentTarget.parentElement.parentElement.id;
-        let point = strategic_points.data[pid];
+        let point = stratpoints.data[pid];
         point.hide();
         let icon = point.hidden ? "eye-closed" : "eye";
         event.currentTarget.children[0].children[0].setAttribute("xlink:href", `#${icon}`);

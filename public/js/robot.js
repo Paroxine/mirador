@@ -138,7 +138,7 @@ map.setView([0.0, 0.0], 3);
 // ROBOT
 
 const params = Object.fromEntries(new URLSearchParams(window.location.search).entries());
-console.log(window.location.search);
+//console.log(window.location.search);
 console.log(params);
 const robot_class = params.robot_class;
 const name = params.name;
@@ -247,6 +247,29 @@ function getRobotIcon(robot_class, color = "#048b9a") {
                 iconSize: [48, 48]
             });
             return robotIcon;;
+            case "tundra":
+                robotIcon = L.divIcon({
+                    html: `
+                    <svg width="48" height="48" viewBox="-64 -64 128 128" xmlns="http://www.w3.org/2000/svg">
+                        <filter id="shadow">
+                            <feDropShadow dx="0" dy="0" stdDeviation="3"/>
+                        </filter>
+                        <g filter="url(#shadow)">
+                            <path d="M 8 -24 C 16 -24 16 -24 24 -32 L 28 -36 A 4 4 90 0 1 36 -28 L 32 -24 C 24 -16 24 -16 24 -8 L 24 8 C 24 16 24 16 32 24 L 36 28 A 4 4 90 0 1 28 36 L 24 32 C 16 24 16 24 8 24 L -8 24 C -16 24 -16 24 -24 32 L -28 36 A 4 4 90 0 1 -36 28 L -32 24 C -24 16 -24 16 -24 8 L -24 -8 C -24 -16 -24 -16 -32 -24 L -36 -28 A 4 4 90 0 1 -28 -36 L -24 -32 C -16 -24 -16 -24 -8 -24 Z" stroke="` + CONTRAST_COLOR + `" fill="` + ROBOT_COLOR + `" stroke-width="4"></path>
+                            <rect x="-6" y="-30" width="12" height="10" stroke="` + CONTRAST_COLOR + `" fill="` + ROBOT_COLOR + `" stroke-width="4"></rect>
+                            <rect x="-8" y="-23" width="16" height="12" stroke="` + CONTRAST_COLOR + `" fill="#d9d9d9" stroke-width="2"></rect>
+                            <circle cx="0" cy="0" r="6" stroke="` + CONTRAST_COLOR + `" fill="#3CC800" stroke-width="2"></circle>
+                        </g>
+                        <circle cx="-32" cy="-32" r="20" stroke="` + CONTRAST_COLOR + `" fill="#888888" fill-opacity=".5" stroke-width="4"></circle>
+                        <circle cx="32" cy="-32" r="20" stroke="` + CONTRAST_COLOR + `" fill="#888888" fill-opacity=".5" stroke-width="4"></circle>
+                        <circle cx="32" cy="32" r="20" stroke="` + CONTRAST_COLOR + `" fill="#888888" fill-opacity=".5" stroke-width="4"></circle>
+                        <circle cx="-32" cy="32" r="20" stroke="` + CONTRAST_COLOR + `" fill="#888888" fill-opacity=".5" stroke-width="4"></circle>
+                        <polygon points="0,-62 -12,-50 12,-50" stroke="` + CONTRAST_COLOR + `" fill="#000000" stroke-width="2"></polygon>
+                    </svg>`,
+                    className: "",
+                    iconSize: [48, 48]
+                });
+                return robotIcon;;
         case "husky":
             robotIcon = L.divIcon({
                 html: `
@@ -382,92 +405,24 @@ var abortPublisher = new ROSLIB.Topic({
     messageType: 'std_msgs/Empty'
 });
 
-if (robot.robot_class == 'anafi') {
-    console.log('Anafi logged');
+if (robot.robot_class == 'anafi' || robot.robot_class == 'tundra') {
+    console.log('Drone logged');
 
     var cmdVelPublisher = new ROSLIB.Topic({
-=======
-
-    ros.on('connection', function () {
-        clearInterval(rosReconnectLoop);
-        console.log('Connected to ROS bridge with success');
-        toast('Connected to ' + robot.name);
-    });
-
-    ros.on('error', function (error) {
-        updateSignal(0);
-        toast('Error connecting to ROS bridge');
-        connectToRos();
-    });
-
-    // Subscribers
-
-    var robotStatusListener = new ROSLIB.Topic({
-        ros: ros,
-        name: '/mirador/status',
-        messageType: 'mirador_driver/Status'
-        //messageType: 'robot_sim/Status'
-    });
-
-    var videoStreamListener = new ROSLIB.Topic({
-        ros: ros,
-        name: streamTopic,
-        //"/zed_node/rgb/image_rect_color/compressed",
-        messageType: 'sensor_msgs/CompressedImage'
-    });
-
-    // Publishers
-
-    var missionPublisher = new ROSLIB.Topic({
-        ros: ros,
-        name: '/mirador/mission',
-        messageType: 'mirador_driver/Mission'
-    });
-
-    var launchPublisher = new ROSLIB.Topic({
-        ros: ros,
-        name: '/mirador/launch',
-        messageType: 'std_msgs/Empty'
-    });
-
-    var abortPublisher = new ROSLIB.Topic({
-        ros: ros,
-        name: '/mirador/abort',
-        messageType: 'std_msgs/Empty'
-    });
-
-    if (robot.robot_class == 'anafi' || robot.robot_class == 'tundra') {
-        console.log('Drone logged');
-
-        var cmdVelPublisher = new ROSLIB.Topic({
-            ros: ros,
-            name: 'mirador/cmd_vel',
-            messageType: 'geometry_msgs/Twist'
-        });
-    } else {
-        console.log('Husky Logged');
-
-        var cmdVelPublisher = new ROSLIB.Topic({
-            ros: ros,
-            name: 'twist_marker_server/cmd_vel',
-            messageType: 'geometry_msgs/Twist'
-        });
-    };
-
-    var takeOffLandPublisher = new ROSLIB.Topic({
         ros: ros,
         name: 'mirador/cmd_vel',
         messageType: 'geometry_msgs/Twist'
     });
 } else {
     console.log('Husky Logged');
-
+    
     var cmdVelPublisher = new ROSLIB.Topic({
         ros: ros,
         name: 'twist_marker_server/cmd_vel',
         messageType: 'geometry_msgs/Twist'
     });
 };
+
 
 var takeOffLandPublisher = new ROSLIB.Topic({
     ros: ros,
@@ -501,7 +456,7 @@ var gimbalPublisher = new ROSLIB.Topic({
 
 // Default robot status
 
-var robotStatus = { pose: { latitude: 0, longitude: 0, altitude: 0, heading: 0 }, signal_quality: 0, state_of_charge: 0, is_running: false, mode: 0, flight_status: 0, e_stop: false, camera_elevation: 0, camera_zoom: 1, stream_method: 0, stream_topic: "" }
+var robotStatus = { pose: { latitude: 0, longitude: 0, altitude: 0, heading: 0 }, signal_quality: 0, state_of_charge: 0, is_running: false, mode: 0, flight_status: 0, e_stop: false, camera_elevation: 0, camera_zoom: 1, stream_method: 0, stream_topic: "", mission_context: { strategic_points: {}}}
 
 robotStatusListener.subscribe(function (status) {
     updatePose(status.pose);
@@ -542,8 +497,6 @@ robotStatusListener.subscribe(function (status) {
     if (status.stream_topic !== robotStatus.stream_topic) {
         robotStatus.stream_topic = status.stream_topic;
 
-        console.log(status.stream_topic);
-
         //Update ROS subscribe topic
         videoStreamListener.name = robotStatus.stream_topic;
     }
@@ -551,7 +504,11 @@ robotStatusListener.subscribe(function (status) {
         updateStreamMethod(status.stream_method);
         robotStatus.stream_method = status.stream_method;
     }
-    robot_stratpoints.updateStratPointsFromRobot(status.mission_context.strategic_points);
+
+    if (status.mission_context.strategic_points.length !== robotStatus.mission_context.strategic_points.length) {
+        robot_stratpoints.updateStratPointsFromRobot(status.mission_context.strategic_points);
+        robotStatus.mission_context.strategic_points = status.mission_context.strategic_points;
+    }
 
     robotStatus = status;
 });
@@ -644,9 +601,6 @@ function pointGuide(event) {
     let point = robot.guide.add(event.latlng.lat, event.latlng.lng);
     point.marker.on('move', function (event) {
         robot.guide.update(event.latlng.lat, event.latlng.lng);
-        publishMission(robot.guide);
-
-    })
         publishMission(robot.guide);
     })
     publishMission(robot.guide);
@@ -928,7 +882,7 @@ joystickLeftManager.on('move', function (event, data) {
     //console.log(positionJoystickLeft);
 
     clearInterval(cmdVelLoopLeft);
-    console.log(positionJoystickLeft);
+    //console.log(positionJoystickLeft);
     cmdVelLoopLeft = setInterval(publishCmdVel, 50);
 }).on('end', function (event, data) {
     positionJoystickLeft.x = 0.0;
@@ -962,7 +916,7 @@ function enableRightJoystick() {
         //publishCmdVel();
 
         clearInterval(cmdVelLoopRight);
-        console.log(positionJoystickRight);
+        //console.log(positionJoystickRight);
         cmdVelLoopRight = setInterval(publishCmdVel, 50);
     }).on('end', function (event, data) {
         positionJoystickRight.x = 0.0;
@@ -1242,8 +1196,8 @@ function updateStreamMethod(method) {
 
           break;
       default:
+    }
 }
-
 
 function updateEStop(e_stop) {
     let eStop = document.getElementById("e-stop");
@@ -1276,53 +1230,6 @@ function updateCameraElevation(elevation) {
 function updateCameraZoom(zoom) {
     let zoomRange = document.getElementById("zoomRange");
     zoomRange.value = zoom;
-}
-
-function updateStreamMethod(method) {
-    switch (method) {
-        case 0:
-            hideImageElements();
-            break;
-        case 1:
-            hideImageElements();
-            break;
-        case 2:
-            hideVideoElements();
-            console.log("Topic Video on topic: " + videoStreamListener.name);
-            const streamImage = document.getElementById('image-stream-display');
-            videoStreamListener.subscribe(function (message) {
-                streamImage.src = "data:image/jpg;base64," + message.data;
-            });
-
-            break;
-        default:
-    }
-    if (status.mode !== robotStatus.mode) {
-        updateCurrentMission(status.mode, status.mission);
-        updateMode(status.mode);
-    }
-    if (status.signal_quality !== robotStatus.signal_quality) {
-        updateSignal(status.signal_quality);
-    }
-    if (status.state_of_charge !== robotStatus.state_of_charge) {
-        updateBatteryCharge(status.state_of_charge);
-    }
-    if (status.is_running !== robotStatus.is_running) {
-        updateIsRunning(status.is_running);
-    }
-    if (status.flight_status !== robotStatus.flight_status) {
-        updateFlightStatus(status.flight_status);
-    }
-    if (status.e_stop !== robotStatus.e_stop) {
-        updateEStop(status.e_stop);
-    }
-    if (status.camera_elevation !== robotStatus.camera_elevation) {
-        updateCameraElevtaion(status.camera_elevation);
-    }
-    if (status.camera_zoom !== robotStatus.camera_zoom) {
-        updateCameraZoom(status.camera_zoom);
-    }
-    robotStatus = status;
 }
 
 function publishMission(mission) {
@@ -1441,4 +1348,4 @@ function publishGimbal(val) {
 window.onunload = window.onbeforeunload = () => {
     socket.close();
     if (typeof peerConnection !== 'undefined') { peerConnection.close(); }
-};
+}
