@@ -505,11 +505,18 @@ robotStatusListener.subscribe(function (status) {
         robotStatus.stream_method = status.stream_method;
     }
 
-    if (status.mission_context.strategic_points.length !== robotStatus.mission_context.strategic_points.length) {
-        robot_stratpoints.updateStratPointsFromRobot(status.mission_context.strategic_points);
+    //In JS arrays are compared by their adress, not their values
+    if (status.mission_context.strategic_points.toString() !== robotStatus.mission_context.strategic_points.toString()) {
+        //Crop only the news points from strategic_points
+        let newPoints = status.mission_context.strategic_points.slice(robotStatus.mission_context.strategic_points.length);
+        
+        console.log(status.mission_context.strategic_points);
+        console.log(robotStatus.mission_context.strategic_points);
+        console.log(newPoints);
+        robot_stratpoints.updateStratPointsFromRobot(newPoints);
         robotStatus.mission_context.strategic_points = status.mission_context.strategic_points;
-    }
 
+    }
     robotStatus = status;
 });
 

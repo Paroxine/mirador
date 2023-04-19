@@ -92,7 +92,8 @@ io.on("connection", (socket) => {
     socket.emit("updateStrategicPoints", strategic_points);
     socket.on("newStratPoints", robot_points => {
         let i = 0;
-        let new_points = robot_points.filter(x => !Object.values(strategic_points).some(y => samePosition(x.position, y.position)));
+        //let new_points = robot_points.filter(x => !Object.values(strategic_points).some(y => sameContent(x, y)));
+        let new_points = robot_points
         for (let new_point of new_points) {  
             new_point.id = strategic_points.length; 
             strategic_points.push(new_point);
@@ -134,4 +135,15 @@ const POSITION_MIN_DISTANCE = 0.0001;
 function samePosition(p1, p2) {
     return Math.abs(p1.longitude - p2.longitude) < POSITION_MIN_DISTANCE &&
            Math.abs(p1.latitude  - p2.latitude) < POSITION_MIN_DISTANCE/2;
+}
+
+function sameContent(p1, p2) {
+    //Check if the Content is different or if the trap is a POI
+    if((p1.message == p2.message) && (p1.message !== "Point d'interet")){
+        console.log("Same server");
+        return 1;
+    }else{
+        console.log("New server");
+        return 0;
+    }
 }

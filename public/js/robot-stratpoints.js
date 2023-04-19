@@ -1,6 +1,7 @@
 class StratPoint {
 
     constructor(id, position, status, radius, message) {
+        this.num = null
         this.id = id;
         this.position = position;
         this.status = status;
@@ -44,18 +45,16 @@ class StratPoint {
         }
     }
 
-    sameId(other) {
-        //Check if the ID is different or if the trap is a POI
-        console.log((this.id != other.id) || (other.id == -1));
-        if((this.id != other.id)){
-            //Not the same id
-            return 0;
-        }else{
-            if(this.id == -1){
-                return samePosition(other);
-            }
-            //same
+    sameContent(other) {
+        //Check if the Content is different or if the trap is a POI
+
+        // BUG DE OUF TROP DE REP
+        if((this.message == other.message) && (other.id !== "-1")){
+            console.log("Same client");
             return 1;
+        }else{
+            console.log("New client");
+            return 0;
         }
     }
 
@@ -105,11 +104,20 @@ class StratPointsLibrary {
         //return Object.values(this.data).some(x => x.samePosition(point));
 
         //Check on the unicity of the ID
-        return Object.values(this.data).some(x => x.sameId(point));
+        //console.log("isKnown");
+        //console.log(point);
+        //console.log("Object.values(this.data)");
+        //console.log(Object.values(this.data));
+        //return Object.values(this.data).some(x => x.sameContent(point));
+        return 0;
+        
     }
 
     unknownPoints(points) {
+        //console.log("unknownPoints");
+        //console.log(points);
         return points.filter(x => !this.isKnown(x));
+        //return 0;
     }
 
     updateHTML() {
@@ -119,12 +127,8 @@ class StratPointsLibrary {
 
     updateFromRobot(robot_points) {
         let new_points = this.unknownPoints(robot_points);
-        let data = new_points.map(x => ({
-            position: x.position,
-            status: x.status,
-            radius: x.radius,
-            message: x.message
-        }));
+        let data = new_points.map(x => new StratPoint(x.id, x.position, x.status, x.radius, x.message));
+
         socket.emit("newStratPoints", data);
         this.updateHTML();
     }
@@ -133,9 +137,14 @@ class StratPointsLibrary {
         server_points = server_points.map(x => new StratPoint(x.id, x.position, x.status, x.radius, x.message));
         for (let sp of server_points) {
             //console.log(this.data[sp.id]);
-            if (this.isKnown(sp)) this.data[sp.id].status = sp.status;
-            else this.data[sp.id] = sp;
+            //if (this.isKnown(sp)) this.data[sp.id].status = sp.status;
+            //else this.data[sp.id] = sp;
+            this.data[sp.id] = sp;
         }
+        console.log("Server size");
+        console.log(server_points);
+        console.log(server_points.length);
+        
         this.updateHTML();
     }
 
@@ -245,7 +254,7 @@ function setup(_socket, _map) {
 }
 
 function updateStratPointsFromRobot(robot_points) {
-    robot_points = robot_points.map(x => new StratPoint(undefined,x.position,x.status,x.radius,x.message));
+    robot_points = robot_points.map(x => new StratPoint(x.id,x.position,x.status,x.radius,x.message));
     stratpoints.updateFromRobot(robot_points);
 }
 
