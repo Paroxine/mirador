@@ -1,8 +1,8 @@
 class StratPoint {
 
-    constructor(id, position, status, radius, message) {
-        this.num = null
+    constructor(id, position, type, status, radius, message) {
         this.id = id;
+        this.type = type;
         this.position = position;
         this.status = status;
         this.radius = radius;
@@ -10,6 +10,7 @@ class StratPoint {
 
         this.hidden = false;
         this.highlight = false;
+
     }
 
     defuse() {
@@ -24,36 +25,49 @@ class StratPoint {
     }
 
     draw() {
+
         if (this.circle) map.removeLayer(this.circle);
         if (this.marker) map.removeLayer(this.marker);
         if (this.hidden) return;
-
+        
         let color = { 0: "green", 1: "red", 2: "orange" }[this.status];
+        let type  = { 0: "unknown", 1: "hybrid", 2: "terrestrial", 3: "aerial" }[this.type];
+        var trapIcon = L.icon({
+            iconUrl: "../public/css/images/"+type+"_trap_"+color+".svg",
+            iconSize:     [30, 30],
+            iconAnchor:   [15, 15],
+            popupAnchor:  [0, 0]
+        });
+
         let latlng = [this.position.latitude, this.position.longitude];
         let circle_options = { radius: this.radius, color: color, weight: 3 };
-        let marker_options = { icon: defaultMarkerIcon(color) };
+        //let marker_options = { icon: defaultMarkerIcon(color) };
+        let marker_options = { icon: trapIcon};
         if (this.highlight) circle_options.weight += 2;
-
+        
         if (!this.circle || this.circle.options != circle_options) {
             this.circle = L.circle(latlng, circle_options);
             this.circle.on("click", () => this.select());
             map.addLayer(this.circle);
+            //this.circle.addTo(map);
         }
+
         if (!this.marker || this.marker.options != marker_options) {
             this.marker = L.marker(latlng, marker_options);
-            if (selected_sp == this) map.addLayer(this.marker);
+            //if (selected_sp == this) 
+            if (!this.hidden) map.addLayer(this.marker);
+            this.marker.on("click", () => toast(this.message));
         }
+        
     }
 
     sameContent(other) {
         //Check if the Content is different or if the trap is a POI
 
         // BUG DE OUF TROP DE REP
-        if((this.message == other.message) && (other.id !== "-1")){
-            console.log("Same client");
+        if((this.position.latitude.toString() == other.position.latitude.toString() && this.position.longitude.toString() == other.position.longitude.toString())){
             return 1;
         }else{
-            console.log("New client");
             return 0;
         }
     }
@@ -71,14 +85,15 @@ class StratPoint {
         } else {
             selected_sp = this;
             $(`#strategicPointsList #${this.id}`).addClass("selected");
-            map.addLayer(this.marker);
+            toast(this.message);
+            //map.addLayer(this.marker);
         }
         updateStratPointSelection();
     }
 
     deselect() {
         $(`#strategicPointsList #${selected_sp.id}`).removeClass("selected");
-        map.removeLayer(selected_sp.marker);
+        //map.removeLayer(selected_sp.marker);
     }
 
     hide() {
@@ -108,44 +123,56 @@ class StratPointsLibrary {
         //console.log(point);
         //console.log("Object.values(this.data)");
         //console.log(Object.values(this.data));
-        //return Object.values(this.data).some(x => x.sameContent(point));
-        return 0;
+        return Object.values(this.data).some(x => x.sameContent(point));
+        //return 0;
         
     }
 
+    // Return compare a list of WP and the WP known and return the new ones
     unknownPoints(points) {
-        //console.log("unknownPoints");
-        //console.log(points);
         return points.filter(x => !this.isKnown(x));
-        //return 0;
     }
 
-    updateHTML() {
-        Object.values(this.data).forEach(x => x.draw(map));
+    //Update the HTML and only draw the new points
+    updateHTML(points) {
+
+        //this.unknownPoints(Object.values(this.data)).forEach(x => x.draw(map));
+        points.forEach(x => x.draw(map));
+        //Object.values(this.data).forEach(x => x.draw(map));
         updateStrategicPointsHTML();
     }
 
     updateFromRobot(robot_points) {
         let new_points = this.unknownPoints(robot_points);
-        let data = new_points.map(x => new StratPoint(x.id, x.position, x.status, x.radius, x.message));
+        console.log("New Robots points");
+        console.log(this.unknownPoints(robot_points));
+        let data = new_points.map(x => new StratPoint(x.id, x.position, x.type, x.status, x.radius, x.message));
 
         socket.emit("newStratPoints", data);
-        this.updateHTML();
+        //this.updateHTML(new_points);
     }
 
     updateFromServer(server_points) {
-        server_points = server_points.map(x => new StratPoint(x.id, x.position, x.status, x.radius, x.message));
+        server_points = server_points.map(x => new StratPoint(x.id, x.position, x.type, x.status, x.radius, x.message));
+
+        let new_server_points = this.unknownPoints(server_points);
+        console.log("New Server points");
+        console.log(this.unknownPoints(server_points));
+        let data = new_server_points.map(x => new StratPoint(x.id, x.position, x.type, x.status, x.radius, x.message));
+
         for (let sp of server_points) {
             //console.log(this.data[sp.id]);
-            //if (this.isKnown(sp)) this.data[sp.id].status = sp.status;
+            if (!this.isKnown(sp)) this.data[sp.id] = sp;
+
             //else this.data[sp.id] = sp;
-            this.data[sp.id] = sp;
+            //this.data[sp.id] = sp;
         }
-        console.log("Server size");
-        console.log(server_points);
-        console.log(server_points.length);
-        
-        this.updateHTML();
+
+        this.updateHTML(new_server_points);
+
+        //console.log(server_points);
+
+        //this.updateHTML(server_points);
     }
 
 };
@@ -174,7 +201,7 @@ function updateStratPointSelection() {
     let info = $("#stratPointInfo");
 
     if (!selected_sp) {
-        info.hide();
+        //info.hide();
     } else {
         info.show();
         colors.forEach(c => btn.removeClass(c));
@@ -207,6 +234,7 @@ function updateStrategicPointsHTML() {
     for (let pid in stratpoints.data) {
         let point = stratpoints.data[pid];
         let icon = point.hidden ? "eye-closed" : "eye";
+
         $('#strategicPointsList').append(`
             <li class="list-group-item px-2" id="${pid}">
                 <div class="align-items-center d-flex gap-2">    
@@ -254,10 +282,22 @@ function setup(_socket, _map) {
 }
 
 function updateStratPointsFromRobot(robot_points) {
-    robot_points = robot_points.map(x => new StratPoint(x.id,x.position,x.status,x.radius,x.message));
+    robot_points = robot_points.map(x => new StratPoint(x.id, x.position, x.type, x.status, x.radius, x.message));
     stratpoints.updateFromRobot(robot_points);
 }
 
+function toast(message) {
+    let time = new Date();
+    let toast = document.createElement('div');
+    toast.className = 'toast';
+    toast.role = 'alert';
+    toast.innerHTML = '<div class="toast-header"><img class="me-2" width="20" height="20" aria-hidden="true" focusable="false" src="/public/img/mirador-icon.svg" alt="Mirador"><strong class="me-auto">Mirador</strong><small>' + time.toLocaleTimeString() + '</small><button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button></div><div class="toast-body">' + message + '</div>';
+    $('.toast-container').append(toast);
+    new bootstrap.Toast(toast).show();
+    toast.addEventListener('hidden.bs.toast', () => {
+        toast.remove();
+    })
+}
 export default {
     setup,
     updateStratPointsFromRobot

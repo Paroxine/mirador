@@ -428,6 +428,12 @@ class Warthog extends UGV {
     }
 }
 
+class Station extends UGV {
+    constructor(name, address, port, color) {
+        super('station', name, address, port, color);
+    }
+}
+
 class UAV extends Robot {
     constructor(robot_class, name, address, port, color) {
         super(robot_class, name, address, port, color);
@@ -449,5 +455,5 @@ class Tundra extends UAV {
 }
 
 if (typeof module !== 'undefined') {
-    module.exports = { Route, Exploration, Missions, Robot, Husky, Warthog, Anafi, Tundra };
+    module.exports = { Route, Exploration, Missions, Station, Robot, Husky, Warthog, Anafi, Tundra };
 }

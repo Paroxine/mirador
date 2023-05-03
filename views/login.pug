@@ -26,6 +26,7 @@ html(lang="en")
                 h2.h3.mb-3.fw-normal Please connect a robot
                 select.form-select.mb-3(aria-label="robot_class" name="robot_class" required)
                     option(value="" selected) Select a class
+                    option(value="station" selected=(robot_class === "station")) Station
                     option(value="husky" selected=(robot_class === "husky")) Husky
                     option(value="anafi" selected=(robot_class === "anafi")) Anafi
                     option(value="tundra" selected=(robot_class === "tundra")) Tundra

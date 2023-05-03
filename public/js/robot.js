@@ -103,6 +103,7 @@ function toast(message) {
     })
 }
 
+
 // MAP INIT
 
 var satelliteLayer = L.tileLayer('https://wxs.ign.fr/{apikey}/geoportail/wmts?REQUEST=GetTile&SERVICE=WMTS&VERSION=1.0.0&STYLE={style}&TILEMATRIXSET=PM&FORMAT={format}&LAYER=ORTHOIMAGERY.ORTHOPHOTOS&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}', {
@@ -160,14 +161,20 @@ var robotModel;
 
 readTextFile("/public/config/config.json", text => {
     var robot_config = JSON.parse(text);
-    if (robot_config[robot.robot_class].type === "uav") {
+    if ( robot.robot_class == 'anafi'|| robot.robot_class == 'tundra') {
         robotModel = "uav";
         hideUGVElements();
         enableRightJoystick();
     }
-    if (robot_config[robot.robot_class].type === "ugv") {
+    if ( robot.robot_class == 'husky'|| robot.robot_class == 'warthog') {
         robotModel = "ugv";
         hideUAVElements();
+    }
+    if ( robot.robot_class == 'station') {
+        robotModel = "uav";
+        hideUGVElements();
+        hideStationElements();
+        enableRightJoystick();
     }
 });
 
@@ -197,6 +204,16 @@ function hideUGVElements() {
     ugv.forEach(element => {
         element.style.display = 'none';
     });
+}
+
+function hideStationElements() {
+    document.querySelector('#dashboard').style.display="none";
+    document.querySelector('#guide').style.display="none";
+    document.querySelector('#exploration').style.display="none";
+    document.querySelector('#route').style.display="none";
+    document.querySelector('#stream-display-container').style.display="none";
+    hideImageElements();
+    hideVideoElements();
 }
 
 function readTextFile(file, callback) {
@@ -247,29 +264,48 @@ function getRobotIcon(robot_class, color = "#048b9a") {
                 iconSize: [48, 48]
             });
             return robotIcon;;
-            case "tundra":
-                robotIcon = L.divIcon({
-                    html: `
-                    <svg width="48" height="48" viewBox="-64 -64 128 128" xmlns="http://www.w3.org/2000/svg">
-                        <filter id="shadow">
-                            <feDropShadow dx="0" dy="0" stdDeviation="3"/>
-                        </filter>
-                        <g filter="url(#shadow)">
-                            <path d="M 8 -24 C 16 -24 16 -24 24 -32 L 28 -36 A 4 4 90 0 1 36 -28 L 32 -24 C 24 -16 24 -16 24 -8 L 24 8 C 24 16 24 16 32 24 L 36 28 A 4 4 90 0 1 28 36 L 24 32 C 16 24 16 24 8 24 L -8 24 C -16 24 -16 24 -24 32 L -28 36 A 4 4 90 0 1 -36 28 L -32 24 C -24 16 -24 16 -24 8 L -24 -8 C -24 -16 -24 -16 -32 -24 L -36 -28 A 4 4 90 0 1 -28 -36 L -24 -32 C -16 -24 -16 -24 -8 -24 Z" stroke="` + CONTRAST_COLOR + `" fill="` + ROBOT_COLOR + `" stroke-width="4"></path>
-                            <rect x="-6" y="-30" width="12" height="10" stroke="` + CONTRAST_COLOR + `" fill="` + ROBOT_COLOR + `" stroke-width="4"></rect>
-                            <rect x="-8" y="-23" width="16" height="12" stroke="` + CONTRAST_COLOR + `" fill="#d9d9d9" stroke-width="2"></rect>
-                            <circle cx="0" cy="0" r="6" stroke="` + CONTRAST_COLOR + `" fill="#3CC800" stroke-width="2"></circle>
-                        </g>
-                        <circle cx="-32" cy="-32" r="20" stroke="` + CONTRAST_COLOR + `" fill="#888888" fill-opacity=".5" stroke-width="4"></circle>
-                        <circle cx="32" cy="-32" r="20" stroke="` + CONTRAST_COLOR + `" fill="#888888" fill-opacity=".5" stroke-width="4"></circle>
-                        <circle cx="32" cy="32" r="20" stroke="` + CONTRAST_COLOR + `" fill="#888888" fill-opacity=".5" stroke-width="4"></circle>
-                        <circle cx="-32" cy="32" r="20" stroke="` + CONTRAST_COLOR + `" fill="#888888" fill-opacity=".5" stroke-width="4"></circle>
-                        <polygon points="0,-62 -12,-50 12,-50" stroke="` + CONTRAST_COLOR + `" fill="#000000" stroke-width="2"></polygon>
-                    </svg>`,
-                    className: "",
-                    iconSize: [48, 48]
-                });
-                return robotIcon;;
+        case "tundra":
+            robotIcon = L.divIcon({
+                html: `
+                <svg width="48" height="48" viewBox="-64 -64 128 128" xmlns="http://www.w3.org/2000/svg">
+                    <filter id="shadow">
+                        <feDropShadow dx="0" dy="0" stdDeviation="3"/>
+                    </filter>
+                    <g filter="url(#shadow)">
+                        <path d="M 8 -24 C 16 -24 16 -24 24 -32 L 28 -36 A 4 4 90 0 1 36 -28 L 32 -24 C 24 -16 24 -16 24 -8 L 24 8 C 24 16 24 16 32 24 L 36 28 A 4 4 90 0 1 28 36 L 24 32 C 16 24 16 24 8 24 L -8 24 C -16 24 -16 24 -24 32 L -28 36 A 4 4 90 0 1 -36 28 L -32 24 C -24 16 -24 16 -24 8 L -24 -8 C -24 -16 -24 -16 -32 -24 L -36 -28 A 4 4 90 0 1 -28 -36 L -24 -32 C -16 -24 -16 -24 -8 -24 Z" stroke="` + CONTRAST_COLOR + `" fill="` + ROBOT_COLOR + `" stroke-width="4"></path>
+                        <rect x="-6" y="-30" width="12" height="10" stroke="` + CONTRAST_COLOR + `" fill="` + ROBOT_COLOR + `" stroke-width="4"></rect>
+                        <rect x="-8" y="-23" width="16" height="12" stroke="` + CONTRAST_COLOR + `" fill="#d9d9d9" stroke-width="2"></rect>
+                        <circle cx="0" cy="0" r="6" stroke="` + CONTRAST_COLOR + `" fill="#3CC800" stroke-width="2"></circle>
+                    </g>
+                    <circle cx="-32" cy="-32" r="20" stroke="` + CONTRAST_COLOR + `" fill="#888888" fill-opacity=".5" stroke-width="4"></circle>
+                    <circle cx="32" cy="-32" r="20" stroke="` + CONTRAST_COLOR + `" fill="#888888" fill-opacity=".5" stroke-width="4"></circle>
+                    <circle cx="32" cy="32" r="20" stroke="` + CONTRAST_COLOR + `" fill="#888888" fill-opacity=".5" stroke-width="4"></circle>
+                    <circle cx="-32" cy="32" r="20" stroke="` + CONTRAST_COLOR + `" fill="#888888" fill-opacity=".5" stroke-width="4"></circle>
+                    <polygon points="0,-62 -12,-50 12,-50" stroke="` + CONTRAST_COLOR + `" fill="#000000" stroke-width="2"></polygon>
+                </svg>`,
+                className: "",
+                iconSize: [48, 48]
+            });
+            return robotIcon;;
+        case "station":
+            robotIcon = L.divIcon({
+                html: `
+                <svg width="48" height="48" viewBox="-64 -64 128 128" xmlns="http://www.w3.org/2000/svg">
+                    <filter id="shadow">
+                        <feDropShadow dx="0" dy="0" stdDeviation="3"/>
+                    </filter>
+                    <g filter="url(#shadow)">
+                        <rect x="-30" y="-20" width="60" height="50" stroke="` + CONTRAST_COLOR + `" fill="` + ROBOT_COLOR + `" stroke-width="4"></rect>
+                        <rect x="-7" y="10" width="14" height="20" stroke="` + CONTRAST_COLOR + `" fill="` + CONTRAST_COLOR + `" stroke-width="4"></rect>
+                        <circle cx="0" cy="0" r="6" stroke="` + CONTRAST_COLOR + `" fill="#3CC800" stroke-width="2"></circle>
+                        <polygon points="-0,-45 -32,-20 32,-20" stroke="` + CONTRAST_COLOR + `" fill="` + ROBOT_COLOR + `"  stroke-width="4"></polygon>
+                    </g>
+                    <polygon points="0,-62 -12,-50 12,-50" stroke="` + CONTRAST_COLOR + `" fill="#000000" stroke-width="2"></polygon>
+                </svg>`,
+                className: "",
+                iconSize: [48, 48]
+            });
+                return robotIcon;;  
         case "husky":
             robotIcon = L.divIcon({
                 html: `
@@ -509,10 +545,7 @@ robotStatusListener.subscribe(function (status) {
     if (status.mission_context.strategic_points.toString() !== robotStatus.mission_context.strategic_points.toString()) {
         //Crop only the news points from strategic_points
         let newPoints = status.mission_context.strategic_points.slice(robotStatus.mission_context.strategic_points.length);
-        
-        console.log(status.mission_context.strategic_points);
-        console.log(robotStatus.mission_context.strategic_points);
-        console.log(newPoints);
+
         robot_stratpoints.updateStratPointsFromRobot(newPoints);
         robotStatus.mission_context.strategic_points = status.mission_context.strategic_points;
 
@@ -1279,7 +1312,7 @@ function publishAbort() {
 
 function publishCmdVel() {
     let twistMessage;
-    if (robotModel === "uav") {
+    if (robot.robot_class == 'anafi' || robot.robot_class == 'tundra') {
         twistMessage = new ROSLIB.Message({
             linear: {
                 x: positionJoystickRight.y * 100,
@@ -1293,7 +1326,7 @@ function publishCmdVel() {
             }
         });
     }
-    else {
+    else if( robot.robot_class == 'husky'|| robot.robot_class == 'warthog'){
         twistMessage = new ROSLIB.Message({
             linear: {
                 x: positionJoystickLeft.y,
@@ -1304,6 +1337,22 @@ function publishCmdVel() {
                 x: .0,
                 y: .0,
                 z: -positionJoystickLeft.x
+            }
+        });
+    }
+    else if( robot.robot_class == 'station'){
+        twistMessage = new ROSLIB.Message({
+            //Left antenna
+            linear: {
+                x: positionJoystickLeft.x,
+                y: positionJoystickLeft.y,
+                z: .0
+            },
+            //Right antenna
+            angular: {
+                x: positionJoystickLeft.x,
+                y: positionJoystickLeft.y,
+                z: .0
             }
         });
     }
