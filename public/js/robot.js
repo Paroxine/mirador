@@ -1,4 +1,5 @@
-import robot_stratpoints from "/public/js/robot-stratpoints.js"
+import robot_stratpoints from "/public/js/robot-stratpoints.js";
+import robot_post_status from "/public/js/robot-post-status.js";
 
 'use strict'
 
@@ -82,6 +83,10 @@ const strategicPointsTab = document.getElementById('strategic-points')
 strategicPointsTab.addEventListener('shown.bs.tab', event => {
     document.location.hash = 'strategic-points';
     mode = 7;
+})
+const postStatusTab = document.getElementById('post-status')
+postStatusTab.addEventListener('shown.bs.tab', event => {
+    document.location.hash = 'post-status';
 })
 
 controlTab.addEventListener('hide.bs.tab', event => {
@@ -1405,3 +1410,6 @@ window.onunload = window.onbeforeunload = () => {
     socket.close();
     if (typeof peerConnection !== 'undefined') { peerConnection.close(); }
 }
+
+//POST STATUS 
+robot_post_status.setup(() => robot);

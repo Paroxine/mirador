@@ -63,9 +63,8 @@ html
             symbol#crosshair(viewbox='0 0 16 16')
                 path(fill-rule='evenodd',d='M8,2 A6,6,0,1,1,8,14 A6,6,0,1,1,8,2 M8,3 A5,5,0,1,1,8,13 A5,5,0,1,1,8,3')
                 path(fill-rule='evenodd',d='M0,8 l0,0.5 l5,0 l0,-1 l-5,0 M16,8 l0,0.5 l-5,0 l0,-1 l5,0 M8,0 l0.5,0 l0,5 l-1,0 l0,-5 M8,16 l0.5,0 l0,-5, l-1,0, l0,5')
-            symbol#flag(viewbox='0 0 16 16')
-                path(fill-rule='evenodd',d='M0,2 C2,0 6,0 8,2 C10,4 14,4 16,2 L16,10 C14,12 10,12 8,10 C6,8 2,8 0,10 L0,2')
-                path(fill-rule='evenodd',d='M0,2 L1,2 L1,16 L0,16')
+            symbol#flag(viewBox="0 0 16 16")
+                path(d="M14.778.085A.5.5 0 0 1 15 .5V8a.5.5 0 0 1-.314.464L14.5 8l.186.464-.003.001-.006.003-.023.009a12.435 12.435 0 0 1-.397.15c-.264.095-.631.223-1.047.35-.816.252-1.879.523-2.71.523-.847 0-1.548-.28-2.158-.525l-.028-.01C7.68 8.71 7.14 8.5 6.5 8.5c-.7 0-1.638.23-2.437.477A19.626 19.626 0 0 0 3 9.342V15.5a.5.5 0 0 1-1 0V.5a.5.5 0 0 1 1 0v.282c.226-.079.496-.17.79-.26C4.606.272 5.67 0 6.5 0c.84 0 1.524.277 2.121.519l.043.018C9.286.788 9.828 1 10.5 1c.7 0 1.638-.23 2.437-.477a19.587 19.587 0 0 0 1.349-.476l.019-.007.004-.002h.001")
             symbol#eye(viewbox='0 0 16 16')
                 path(fill-rule='evenodd',d='M0,8 C4,2 12,2 16,8 C12,14 4,14 0,8 M2,8 C5,4 11,4 14,8 C11,12 5,12 2,8')
                 path(fill-rule='evenodd',d='M6,8 A2 2 180 0 0 10,8 A2 2 180 1 0 6,8')
@@ -190,279 +189,316 @@ html
                 rect(x='-24' y='16' width='48' height='8' stroke='#606060' fill='#000000' fill-opacity='0.3' stroke-width='1')
                 rect(x='-15' y='-24' width='30' height='48' stroke='#606060' fill='#444444' stroke-width='1')
                 circle(cx='0' cy='0' r='3' stroke='#606060' fill='#3CC800' stroke-width='1')
-            
-            div.container-fluid.d-flex.p-0
-                nav.d-flex.flex-nowrap(id="nav")
-                    div.d-flex.flex-column.flex-shrink-0.bg-light(style="width: 4.5em;")
-                        a.d-block.p-3.link-dark.text-decoration-none.text-center(href=`/robot?robot_class=${robot_class}&name=${name}&address=${address}&port=${port}&color=%23${color.slice(1)}` data-bs-toggle="tooltip" data-bs-placement="right" title="Mirador")
-                            svg.pe-none(width="40" height="40")
-                                use(xlink:href="#mirador")
-                            span.visually-hidden Mirador
-                        ul.nav.nav-pills.nav-flush.flex-column.mb-auto.text-center(role="tablist")
-                            li.nav-item(role="presentation")
-                                span(data-bs-toggle="tooltip" data-bs-placement="right" title="Dashboard")
-                                    a.nav-link.py-3.border-top.border-bottom.rounded-0.active(href="#mode-dashboard" id="dashboard" aria-current="page" data-bs-toggle="pill" type="button" role="tab" data-bs-target="#mode-dashboard" aria-controls="mode-dashboard" aria-selected="true")
-                                        svg.bi.pe-none(width="26" height="26" role="img" aria-label="Dashboard")
-                                            use(xlink:href="#speedometer")
-                            li.nav-item(role="presentation")
-                                span(data-bs-toggle="tooltip" data-bs-placement="right" title="Guide")
-                                    a.nav-link.py-3.border-bottom.rounded-0(href='#mode-guide' id="guide" data-bs-toggle="pill" type="button" role="tab" data-bs-target="#mode-guide" aria-controls="mode-guide" aria-selected="false")
-                                        svg.bi.pe-none(width='26' height='26' role='img' aria-label='Guide')
-                                            use(xlink:href='#signpost')
-                            li.nav-item(role="presentation")
-                                span(data-bs-toggle="tooltip" data-bs-placement="right" title="Route")
-                                    a.nav-link.py-3.border-bottom.rounded-0(href='#mode-route' id="route" data-bs-toggle="pill" type="button" role="tab" data-bs-target="#mode-route" aria-controls="mode-route" aria-selected="false")
-                                        svg.bi.pe-none(width='26' height='26' role='img' aria-label='Route')
-                                            use(xlink:href='#geo-alt')
-                            li.nav-item(role="presentation")
-                                span(data-bs-toggle="tooltip" data-bs-placement="right" title="Exploration")
-                                    a.nav-link.py-3.border-bottom.rounded-0(href='#mode-exploration' id="exploration" data-bs-toggle="pill" type="button" role="tab" data-bs-target="#mode-exploration" aria-controls="mode-exploration" aria-selected="false")
-                                        svg.bi.pe-none(width='26' height='26' role='img' aria-label='Exploration')
-                                            use(xlink:href='#map')
-                            li.nav-item(role="presentation")
-                                span(data-bs-toggle="tooltip" data-bs-placement="right" title="Control")
-                                    a.nav-link.py-3.border-bottom.rounded-0(href='#mode-control' id="control" data-bs-toggle="pill" type="button" role="tab" data-bs-target="#mode-control" aria-controls="mode-control" aria-selected="false")
-                                        svg.bi.pe-none(width='26' height='26' role='img' aria-label='Control')
-                                            use(xlink:href='#dpad')
-                            li.nav-item(role="presentation")
-                                span(data-bs-toggle="tooltip" data-bs-placement="right" title="Ping")
-                                    a.nav-link.py-3.border-bottom.rounded-0(href='#mode-ping' id="ping" data-bs-toggle="pill" type="button" role="tab" data-bs-target="#mode-ping" aria-controls="mode-ping" aria-selected="false")
-                                        svg.bi.pe-none(width='26' height='26' role='img' aria-label='Ping')
+            symbol#upload(viewbox="0 0 16 16")
+                path(d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z")
+                path(d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V2.707L5.354 4.854a.5.5 0 1 1-.708-.708l3-3z")
+        
+        // Screen
+        div.container-fluid.d-flex.p-0
+            //Tab selection
+            nav.d-flex.flex-nowrap(id="nav")
+                div.d-flex.flex-column.flex-shrink-0.bg-light(style="width: 4.5em;")
+                    a.d-block.p-3.link-dark.text-decoration-none.text-center(href=`/robot?robot_class=${robot_class}&name=${name}&address=${address}&port=${port}&color=%23${color.slice(1)}` data-bs-toggle="tooltip" data-bs-placement="right" title="Mirador")
+                        svg.pe-none(width="40" height="40")
+                            use(xlink:href="#mirador")
+                        span.visually-hidden Mirador
+                    ul.nav.nav-pills.nav-flush.flex-column.mb-auto.text-center(role="tablist")
+                        li.nav-item(role="presentation")
+                            span(data-bs-toggle="tooltip" data-bs-placement="right" title="Dashboard")
+                                a.nav-link.py-3.border-top.border-bottom.rounded-0.active(href="#mode-dashboard" id="dashboard" aria-current="page" data-bs-toggle="pill" type="button" role="tab" data-bs-target="#mode-dashboard" aria-controls="mode-dashboard" aria-selected="true")
+                                    svg.bi.pe-none(width="26" height="26" role="img" aria-label="Dashboard")
+                                        use(xlink:href="#speedometer")
+                        li.nav-item(role="presentation")
+                            span(data-bs-toggle="tooltip" data-bs-placement="right" title="Guide")
+                                a.nav-link.py-3.border-bottom.rounded-0(href='#mode-guide' id="guide" data-bs-toggle="pill" type="button" role="tab" data-bs-target="#mode-guide" aria-controls="mode-guide" aria-selected="false")
+                                    svg.bi.pe-none(width='26' height='26' role='img' aria-label='Guide')
+                                        use(xlink:href='#signpost')
+                        li.nav-item(role="presentation")
+                            span(data-bs-toggle="tooltip" data-bs-placement="right" title="Route")
+                                a.nav-link.py-3.border-bottom.rounded-0(href='#mode-route' id="route" data-bs-toggle="pill" type="button" role="tab" data-bs-target="#mode-route" aria-controls="mode-route" aria-selected="false")
+                                    svg.bi.pe-none(width='26' height='26' role='img' aria-label='Route')
+                                        use(xlink:href='#geo-alt')
+                        li.nav-item(role="presentation")
+                            span(data-bs-toggle="tooltip" data-bs-placement="right" title="Exploration")
+                                a.nav-link.py-3.border-bottom.rounded-0(href='#mode-exploration' id="exploration" data-bs-toggle="pill" type="button" role="tab" data-bs-target="#mode-exploration" aria-controls="mode-exploration" aria-selected="false")
+                                    svg.bi.pe-none(width='26' height='26' role='img' aria-label='Exploration')
+                                        use(xlink:href='#map')
+                        li.nav-item(role="presentation")
+                            span(data-bs-toggle="tooltip" data-bs-placement="right" title="Control")
+                                a.nav-link.py-3.border-bottom.rounded-0(href='#mode-control' id="control" data-bs-toggle="pill" type="button" role="tab" data-bs-target="#mode-control" aria-controls="mode-control" aria-selected="false")
+                                    svg.bi.pe-none(width='26' height='26' role='img' aria-label='Control')
+                                        use(xlink:href='#dpad')
+                        li.nav-item(role="presentation")
+                            span(data-bs-toggle="tooltip" data-bs-placement="right" title="Ping")
+                                a.nav-link.py-3.border-bottom.rounded-0(href='#mode-ping' id="ping" data-bs-toggle="pill" type="button" role="tab" data-bs-target="#mode-ping" aria-controls="mode-ping" aria-selected="false")
+                                    svg.bi.pe-none(width='26' height='26' role='img' aria-label='Ping')
+                                        use(xlink:href='#crosshair')
+                        li.nav-item(role="presentation")
+                            span(data-bs-toggle="tooltip" data-bs-placement="right" title="Strategic points")
+                                a.nav-link.py-3.border-bottom.rounded-0(href='#mode-strategic-points' id="strategic-points" data-bs-toggle="pill" type="button" role="tab" data-bs-target="#mode-strategic-points" aria-controls="mode-strategic-points" aria-selected="false")
+                                    svg.bi.pe-none(width='26' height='26' role='img' aria-label='Strategic points')
+                                        use(xlink:href='#flag')
+                        li.nav-item(role="presentation")
+                            span(data-bs-toggle="tooltip" data-bs-placement="right" title="POST Status")
+                                a.nav-link.py-3.border-bottom.rounded-0(href='#mode-post-status' id="post-status" data-bs-toggle="pill" type="button" role="tab" data-bs-target="#mode-post-status" aria-controls="mode-post-status" aria-selected="false")
+                                        svg.bi.pe-none(width='26' height='26' role='img' aria-label='POST Status')
+                                            use(xlink:href='#upload')
+                    div.dropdown.border-top
+                        a.d-flex.align-items-center.justify-content-center.p-3.link-dark.text-decoration-none.dropdown-toggle(href='#' id="dropdownRobot" data-bs-toggle='dropdown' aria-expanded='false')
+                            svg.bi(width='24' height='24' role='img')
+                                use(xlink:href=`#${robot_class}`)
+                        ul.dropdown-menu.text-small.shadow(id='dropdownMenuRobot' aria-labelledby='dropdownRobot' style='')
+                            li
+                                a.dropdown-item(data-bs-toggle='offcanvas' data-bs-target='#offcanvasSettings' aria-controls='offcanvasSettings') Settings
+                            li
+                                a.dropdown-item(href='https://github.com/julesberhault/mirador' target='_blank') About Mirador
+                            li
+                                hr.dropdown-divider
+                            li
+                                a.dropdown-item(href='/login' target='_blank') Connect to a new robot
+                            li
+                                a.dropdown-item(data-bs-toggle='modal' data-bs-target='#disconnectModal') Disconnect
+            //Map, joysticks, video and tabs
+            main.d-flex.flex-nowrap.grow-1
+                //Map
+                div(id="leafletmap")
+                //Tabs
+                div.rounded-4.shadow(id="omnibox")
+                    div.container.rounded-4.bg-white.d-flex.py-2.align-items-center(id="topbar")
+                        div.flex-grow-1.gap-2.me-2
+                            svg.rise.me-2(id="signal" width="22px" height="22px" role="img" aria-label="signal" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Signal")
+                                use(xlink:href="#reception-0")
+                            svg.rise.me-2(id="current-mode" width="22px" height="22px" role="img" aria-label="current-mode" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Job" display="none")
+                                use(xlink:href="#cursor-fill")
+                            div.spinner-border.me-2(id="is-running" role="status" style="width: 22px; height: 22px; margin-bottom: -4px; display: none;" aria-label="is-running" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Running")
+                            svg.rise.me-2(id="e-stop" width="22px" height="22px" role="img" aria-label="e-stop" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Emergency Stop" display="none")
+                                use(xlink:href="#sign-stop-fill")
+                            b.me-2(id="altitude" aria-label="altitude" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Altitude")
+                            div.uav.badge.bg-dark(id="flight-status" aria-label="flight-status" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Flight Status")
+                        b.me-2=`${name}`
+                        div.progress.border.border-2.border-dark.position-relative.bg-light(id="battery-charge" style="height: 20px; width: 40px"  aria-label="battery-charge" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Battery")
+                            div.progress-bar.border.border-1.border-light.rounded-1.bg-dark(id="battery-charge-bar" role="progressbar" aria-valuenow="0" style="width: 0%;" aria-valuemin="0" aria-valuemax="100")
+                        svg(xmlns='http://www.w3.org/2000/svg' width='3' height='10' style='margin: 0 0 0 1px;')
+                            circle(cx='-2' cy='5' r='5' fill='#212529')
+                    div.container.overflow-auto.collapse.show(id='omnibox-content')
+                        div.tab-content.mb-1
+                            // Dashboard
+                            div.tab-pane.fade.show.active(id="mode-dashboard" role="tabpanel" aria-labelledby="dashboard-tab")
+                                div.text-center.border-bottom.py-2
+                                    svg.bi.me-2(width='24' height='24' role='img')
+                                        use(xlink:href='#speedometer')
+                                    span.h2 Dashboard
+                                div.d-grid.gap-2.pt-2
+                                    ul.list-group(id='currentMissionList')
+                                    ul.list-group(id='savedMissionList')
+                                    button(id='pushNextMissionBtn' type='button').btn.btn-secondary
+                                        svg.bi(width='16' height='16' role='img')
+                                            use(xlink:href='#box-arrow-in-up')
+                                        |   Push next mission
+                                    button(id='launchMissionBtn' type='button').btn.btn-primary
+                                        svg.bi(width='16' height='16' role='img')
+                                            use(xlink:href='#play-fill')
+                                        |   Launch mission
+                                    button(id='stopMissionBtn' type='button').btn.btn-danger
+                                        svg.bi(width='16' height='16' role='img')
+                                            use(xlink:href='#stop-fill')
+                                        |   Stop mission
+                            // Guide
+                            div.tab-pane.fade(id="mode-guide" role="tabpanel" aria-labelledby="guide-tab")
+                                div.text-center.border-bottom.py-2
+                                    svg.bi.me-2(width='24' height='24' role='img')
+                                        use(xlink:href='#signpost')
+                                    span.h2 Guide
+                                div.d-grid.gap-2.pt-2
+                                    button(id='pointGuideBtn' type='button').btn.btn-primary
+                                        svg.bi(width='16' height='16' role='img')
+                                            use(xlink:href='#pin-angle-fill')
+                                        |   Point a target
+                                    button(id='clearGuideBtn' type='button').btn.btn-danger
+                                        svg.bi(width='16' height='16' role='img')
+                                            use(xlink:href='#x-circle')
+                                        |   Cancel
+                            // Route
+                            div.tab-pane.fade(id="mode-route" role="tabpanel" aria-labelledby="route-tab")
+                                div.text-center.border-bottom.py-2
+                                    svg.bi.me-2(width='24' height='24' role='img')
+                                        use(xlink:href='#geo-alt')
+                                    span.h2 Route
+                                div.d-grid.pt-2
+                                    button(id='refreshRouteBtn' type='button').btn.btn-secondary.mb-2
+                                        svg.bi(width='16' height='16' role='img')
+                                            use(xlink:href='#arrow-repeat')
+                                        |   Refresh route
+                                    ul.list-group.border-bottom-0(id='waypointList')
+                                    ul.list-group.collapse.multi-collapse.multi-collapse-route(id='addingWpCollapse')
+                                        li.list-group-item.d-flex.justify-content-center
+                                            div.d-flex.gap-2
+                                                small.text-muted Click on the map to add waypoint
+                                                button.btn.btn-danger.disabled(type='button' id='clearRouteBtn')
+                                                    svg.bi(width='16' height='16' role='img')
+                                                        use(xlink:href='#trash3')
+                                                    |   Clear
+                                                button.btn.btn-secondary(type='button' id='stopAddingWpBtn' data-bs-toggle='collapse' data-bs-target='.multi-collapse-route' role='button' aria-expanded='false' aria-controls='addWpCollapse addingWpCollapse')
+                                                    svg.bi(width='16' height='16' role='img')
+                                                        use(xlink:href='#check-circle')
+                                                    |   Finish
+                                    ul.list-group.collapse.multi-collapse.multi-collapse-route.show(id='addWpCollapse')
+                                        li.list-group-item.list-group-item-action.d-flex.justify-content-center(id='addWpBtn' data-bs-toggle='collapse' data-bs-target='.multi-collapse-route' role='button' aria-expanded='false' aria-controls='addWpCollapse addingWpCollapse')
+                                            svg.bi.me-2(width="20" height="20" role="img")
+                                                use(xlink:href="#geo")
+                                            |   Modify route
+                                    form.pt-2.uav(onsubmit='return false;')
+                                        div.input-group.align-items-center
+                                            span.input-group-text.pe-5 Flight altitude
+                                            input.form-control(type="text" name="altitudeInput" id="altitudeInput" oninput="this.form.altitudeRange.value=this.value" value="10")
+                                            span.input-group-text m
+                                        div.d-flex.align-items-center.mt-2
+                                            small 0
+                                            input.form-range.mx-2(type="range" name="altitudeRange" min="0" max="40" step="2" id="altitudeRange" oninput="this.form.altitudeInput.value=this.value;" value=2)
+                                            small 40m
+                                    button.btn.btn-primary.pb-2.mt-2(id='sendRouteBtn' type='button') Confirm route
+                            // Exploration
+                            div.tab-pane.fade(id="mode-exploration" role="tabpanel" aria-labelledby="exploration-tab")
+                                div.text-center.border-bottom.py-2
+                                    svg.bi.me-2(width='24' height='24' role='img')
+                                        use(xlink:href='#map')
+                                    span.h2 Exploration
+                                div.d-grid.pt-2
+                                    button(id='refreshAreaBtn' type='button').btn.btn-secondary.mb-2
+                                        svg.bi(width='16' height='16' role='img')
+                                            use(xlink:href='#arrow-repeat')
+                                        |   Refresh area
+                                    ul.list-group.border-bottom-0(id='areaList')
+                                    ul.list-group.collapse.multi-collapse.multi-collapse-exploration(id='addingAreaCollapse')
+                                        li.list-group-item.d-flex.justify-content-center
+                                            div.d-flex.gap-2
+                                                small.text-muted Click on the map to add vertex
+                                                button.btn.btn-danger.disabled(type='button' id='clearAreaBtn')
+                                                    svg.bi(width='16' height='16' role='img')
+                                                        use(xlink:href='#trash3')
+                                                    |   Clear
+                                                button.btn.btn-secondary(type='button' id='stopAddingAreaBtn' data-bs-toggle='collapse' data-bs-target='.multi-collapse-exploration' role='button' aria-expanded='false' aria-controls='addAreaCollapse addingAreaCollapse')
+                                                    svg.bi(width='16' height='16' role='img')
+                                                        use(xlink:href='#check-circle')
+                                                    |   Finish
+                                    ul.list-group.collapse.multi-collapse.multi-collapse-exploration.show(id='addAreaCollapse')
+                                        li.list-group-item.list-group-item-action.d-flex.justify-content-center(id='addAreaBtn' data-bs-toggle='collapse' data-bs-target='.multi-collapse-exploration' role='button' aria-expanded='false' aria-controls='addAreaCollapse addingAreaCollapse')
+                                            svg.bi.me-2(width="20" height="20" role="img")
+                                                use(xlink:href="#pentagon")
+                                            |   Modify area
+                                    button(id='sendAreaBtn' type='button').btn.btn-primary.pb-2.mt-2 Confirm area
+                            // Control
+                            div.tab-pane.fade(id="mode-control" role="tabpanel" aria-labelledby="control-tab")
+                                div.text-center.border-bottom.py-2
+                                    svg.bi.me-2(width='24' height='24' role='img')
+                                        use(xlink:href='#dpad')
+                                    span.h2 Control
+                                div.d-grid.gap-2.pt-2
+                                    button.btn.btn-secondary(type='button' data-bs-toggle="modal" data-bs-target="#controlInfoModal")
+                                        svg.bi(width='16' height='16' role='img')
+                                            use(xlink:href='#info-circle')
+                                        |   How to control your robot
+                                    div.d-flex.gap-2
+                                        button.btn.btn-primary.col.flex-grow-1.uav(id='takeOffBtn' type='button')
+                                            svg.bi(width='16' height='16' role='img')
+                                                use(xlink:href='#arrow-up')
+                                            |   Take off
+                                        button.btn.btn-primary.col.flex-grow-1.uav(id='landBtn' type='button')
+                                            svg.bi(width='16' height='16' role='img')
+                                                use(xlink:href='#arrow-down')
+                                            |   Land
+                                    div.d-flex.gap-2
+                                        button.btn.btn-primary.flex-grow-1.uav(id='returnToLaunchBtn' type='button')
+                                            svg.bi(width='16' height='16' role='img')
+                                                use(xlink:href='#arrow-90deg-down')
+                                            |   Return to launch
+                                        button.btn.btn-secondary.flex-grow-1.uav(id='setHomeBtn' type='button') Set home
+                                    div.text-center.uav
+                                        strong Camera elevation angle
+                                        div.d-flex.align-items-center
+                                            small -90°
+                                            input.form-range.mx-2(type="range" name="elevationRange" min="-90" max="90" step="15" id="elevationRange" value=0)
+                                            small +90°
+                                    div.text-center.uav
+                                        strong Camera zoom
+                                        div.d-flex.align-items-center
+                                            small 1×
+                                            input.form-range.mx-2(type="range" name="zoomRange" min="1" max="4" step="1" id="zoomRange" value=1)
+                                            small 4×
+                            // Ping
+                            div.tab-pane.fade(id="mode-ping" role="tabpanel" aria-labelledby="ping-tab")
+                                div.text-center.border-bottom.py-2
+                                    svg.bi.me-2(width='24' height='24' role='img')
+                                        use(xlink:href='#crosshair')
+                                    span.h2 Ping
+                                div.d-grid.gap-2.pt-2
+                                    button(id='pingBtn' type='button').btn.btn-primary
+                                        svg.bi(width='16' height='16' role='img')
                                             use(xlink:href='#crosshair')
-                            li.nav-item(role="presentation")
-                                span(data-bs-toggle="tooltip" data-bs-placement="right" title="Strategic points")
-                                    a.nav-link.py-3.border-bottom.rounded-0(href='#mode-strategic-points' id="strategic-points" data-bs-toggle="pill" type="button" role="tab" data-bs-target="#mode-strategic-points" aria-controls="mode-strategic-points" aria-selected="false")
-                                        svg.bi.pe-none(width='26' height='26' role='img' aria-label='Strategic points')
-                                            use(xlink:href='#flag')
-                        div.dropdown.border-top
-                            a.d-flex.align-items-center.justify-content-center.p-3.link-dark.text-decoration-none.dropdown-toggle(href='#' id="dropdownRobot" data-bs-toggle='dropdown' aria-expanded='false')
-                                svg.bi(width='24' height='24' role='img')
-                                    use(xlink:href=`#${robot_class}`)
-                            ul.dropdown-menu.text-small.shadow(id='dropdownMenuRobot' aria-labelledby='dropdownRobot' style='')
-                                li
-                                    a.dropdown-item(data-bs-toggle='offcanvas' data-bs-target='#offcanvasSettings' aria-controls='offcanvasSettings') Settings
-                                li
-                                    a.dropdown-item(href='https://github.com/julesberhault/mirador' target='_blank') About Mirador
-                                li
-                                    hr.dropdown-divider
-                                li
-                                    a.dropdown-item(href='/login' target='_blank') Connect to a new robot
-                                li
-                                    a.dropdown-item(data-bs-toggle='modal' data-bs-target='#disconnectModal') Disconnect
-                main.d-flex.flex-nowrap.grow-1
-                    div(id="leafletmap")
-                    div.rounded-4.shadow(id="omnibox")
-                        div.container.rounded-4.bg-white.d-flex.py-2.align-items-center(id="topbar")
-                            div.flex-grow-1.gap-2.me-2
-                                svg.rise.me-2(id="signal" width="22px" height="22px" role="img" aria-label="signal" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Signal")
-                                    use(xlink:href="#reception-0")
-                                svg.rise.me-2(id="current-mode" width="22px" height="22px" role="img" aria-label="current-mode" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Job" display="none")
-                                    use(xlink:href="#cursor-fill")
-                                div.spinner-border.me-2(id="is-running" role="status" style="width: 22px; height: 22px; margin-bottom: -4px; display: none;" aria-label="is-running" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Running")
-                                svg.rise.me-2(id="e-stop" width="22px" height="22px" role="img" aria-label="e-stop" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Emergency Stop" display="none")
-                                    use(xlink:href="#sign-stop-fill")
-                                b.me-2(id="altitude" aria-label="altitude" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Altitude")
-                                div.uav.badge.bg-dark(id="flight-status" aria-label="flight-status" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Flight Status")
-                            b.me-2=`${name}`
-                            div.progress.border.border-2.border-dark.position-relative.bg-light(id="battery-charge" style="height: 20px; width: 40px"  aria-label="battery-charge" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Battery")
-                                div.progress-bar.border.border-1.border-light.rounded-1.bg-dark(id="battery-charge-bar" role="progressbar" aria-valuenow="0" style="width: 0%;" aria-valuemin="0" aria-valuemax="100")
-                            svg(xmlns='http://www.w3.org/2000/svg' width='3' height='10' style='margin: 0 0 0 1px;')
-                                circle(cx='-2' cy='5' r='5' fill='#212529')
-                        div.container.overflow-auto.collapse.show(id='omnibox-content')
-                            div.tab-content.mb-1
-                                // Dashboard
-                                div.tab-pane.fade.show.active(id="mode-dashboard" role="tabpanel" aria-labelledby="dashboard-tab")
-                                    div.text-center.border-bottom.py-2
-                                        svg.bi.me-2(width='24' height='24' role='img')
-                                            use(xlink:href='#speedometer')
-                                        span.h2 Dashboard
-                                    div.d-grid.gap-2.pt-2
-                                        ul.list-group(id='currentMissionList')
-                                        ul.list-group(id='savedMissionList')
-                                        button(id='pushNextMissionBtn' type='button').btn.btn-secondary
-                                            svg.bi(width='16' height='16' role='img')
-                                                use(xlink:href='#box-arrow-in-up')
-                                            |   Push next mission
-                                        button(id='launchMissionBtn' type='button').btn.btn-primary
-                                            svg.bi(width='16' height='16' role='img')
-                                                use(xlink:href='#play-fill')
-                                            |   Launch mission
-                                        button(id='stopMissionBtn' type='button').btn.btn-danger
-                                            svg.bi(width='16' height='16' role='img')
-                                                use(xlink:href='#stop-fill')
-                                            |   Stop mission
-                                // Guide
-                                div.tab-pane.fade(id="mode-guide" role="tabpanel" aria-labelledby="guide-tab")
-                                    div.text-center.border-bottom.py-2
-                                        svg.bi.me-2(width='24' height='24' role='img')
-                                            use(xlink:href='#signpost')
-                                        span.h2 Guide
-                                    div.d-grid.gap-2.pt-2
-                                        button(id='pointGuideBtn' type='button').btn.btn-primary
-                                            svg.bi(width='16' height='16' role='img')
-                                                use(xlink:href='#pin-angle-fill')
-                                            |   Point a target
-                                        button(id='clearGuideBtn' type='button').btn.btn-danger
-                                            svg.bi(width='16' height='16' role='img')
-                                                use(xlink:href='#x-circle')
-                                            |   Cancel
-                                // Route
-                                div.tab-pane.fade(id="mode-route" role="tabpanel" aria-labelledby="route-tab")
-                                    div.text-center.border-bottom.py-2
-                                        svg.bi.me-2(width='24' height='24' role='img')
-                                            use(xlink:href='#geo-alt')
-                                        span.h2 Route
-                                    div.d-grid.pt-2
-                                        button(id='refreshRouteBtn' type='button').btn.btn-secondary.mb-2
-                                            svg.bi(width='16' height='16' role='img')
-                                                use(xlink:href='#arrow-repeat')
-                                            |   Refresh route
-                                        ul.list-group.border-bottom-0(id='waypointList')
-                                        ul.list-group.collapse.multi-collapse.multi-collapse-route(id='addingWpCollapse')
-                                            li.list-group-item.d-flex.justify-content-center
-                                                div.d-flex.gap-2
-                                                    small.text-muted Click on the map to add waypoint
-                                                    button.btn.btn-danger.disabled(type='button' id='clearRouteBtn')
-                                                        svg.bi(width='16' height='16' role='img')
-                                                            use(xlink:href='#trash3')
-                                                        |   Clear
-                                                    button.btn.btn-secondary(type='button' id='stopAddingWpBtn' data-bs-toggle='collapse' data-bs-target='.multi-collapse-route' role='button' aria-expanded='false' aria-controls='addWpCollapse addingWpCollapse')
-                                                        svg.bi(width='16' height='16' role='img')
-                                                            use(xlink:href='#check-circle')
-                                                        |   Finish
-                                        ul.list-group.collapse.multi-collapse.multi-collapse-route.show(id='addWpCollapse')
-                                            li.list-group-item.list-group-item-action.d-flex.justify-content-center(id='addWpBtn' data-bs-toggle='collapse' data-bs-target='.multi-collapse-route' role='button' aria-expanded='false' aria-controls='addWpCollapse addingWpCollapse')
-                                                svg.bi.me-2(width="20" height="20" role="img")
-                                                    use(xlink:href="#geo")
-                                                |   Modify route
-                                        form.pt-2.uav(onsubmit='return false;')
-                                            div.input-group.align-items-center
-                                                span.input-group-text.pe-5 Flight altitude
-                                                input.form-control(type="text" name="altitudeInput" id="altitudeInput" oninput="this.form.altitudeRange.value=this.value" value="10")
-                                                span.input-group-text m
-                                            div.d-flex.align-items-center.mt-2
-                                                small 0
-                                                input.form-range.mx-2(type="range" name="altitudeRange" min="0" max="40" step="2" id="altitudeRange" oninput="this.form.altitudeInput.value=this.value;" value=2)
-                                                small 40m
-                                        button.btn.btn-primary.pb-2.mt-2(id='sendRouteBtn' type='button') Confirm route
-                                // Exploration
-                                div.tab-pane.fade(id="mode-exploration" role="tabpanel" aria-labelledby="exploration-tab")
-                                    div.text-center.border-bottom.py-2
-                                        svg.bi.me-2(width='24' height='24' role='img')
-                                            use(xlink:href='#map')
-                                        span.h2 Exploration
-                                    div.d-grid.pt-2
-                                        button(id='refreshAreaBtn' type='button').btn.btn-secondary.mb-2
-                                            svg.bi(width='16' height='16' role='img')
-                                                use(xlink:href='#arrow-repeat')
-                                            |   Refresh area
-                                        ul.list-group.border-bottom-0(id='areaList')
-                                        ul.list-group.collapse.multi-collapse.multi-collapse-exploration(id='addingAreaCollapse')
-                                            li.list-group-item.d-flex.justify-content-center
-                                                div.d-flex.gap-2
-                                                    small.text-muted Click on the map to add vertex
-                                                    button.btn.btn-danger.disabled(type='button' id='clearAreaBtn')
-                                                        svg.bi(width='16' height='16' role='img')
-                                                            use(xlink:href='#trash3')
-                                                        |   Clear
-                                                    button.btn.btn-secondary(type='button' id='stopAddingAreaBtn' data-bs-toggle='collapse' data-bs-target='.multi-collapse-exploration' role='button' aria-expanded='false' aria-controls='addAreaCollapse addingAreaCollapse')
-                                                        svg.bi(width='16' height='16' role='img')
-                                                            use(xlink:href='#check-circle')
-                                                        |   Finish
-                                        ul.list-group.collapse.multi-collapse.multi-collapse-exploration.show(id='addAreaCollapse')
-                                            li.list-group-item.list-group-item-action.d-flex.justify-content-center(id='addAreaBtn' data-bs-toggle='collapse' data-bs-target='.multi-collapse-exploration' role='button' aria-expanded='false' aria-controls='addAreaCollapse addingAreaCollapse')
-                                                svg.bi.me-2(width="20" height="20" role="img")
-                                                    use(xlink:href="#pentagon")
-                                                |   Modify area
-                                        button(id='sendAreaBtn' type='button').btn.btn-primary.pb-2.mt-2 Confirm area
-                                // Control
-                                div.tab-pane.fade(id="mode-control" role="tabpanel" aria-labelledby="control-tab")
-                                    div.text-center.border-bottom.py-2
-                                        svg.bi.me-2(width='24' height='24' role='img')
-                                            use(xlink:href='#dpad')
-                                        span.h2 Control
-                                    div.d-grid.gap-2.pt-2
-                                        button.btn.btn-secondary(type='button' data-bs-toggle="modal" data-bs-target="#controlInfoModal")
-                                            svg.bi(width='16' height='16' role='img')
-                                                use(xlink:href='#info-circle')
-                                            |   How to control your robot
-                                        div.d-flex.gap-2
-                                            button.btn.btn-primary.col.flex-grow-1.uav(id='takeOffBtn' type='button')
-                                                svg.bi(width='16' height='16' role='img')
-                                                    use(xlink:href='#arrow-up')
-                                                |   Take off
-                                            button.btn.btn-primary.col.flex-grow-1.uav(id='landBtn' type='button')
-                                                svg.bi(width='16' height='16' role='img')
-                                                    use(xlink:href='#arrow-down')
-                                                |   Land
-                                        div.d-flex.gap-2
-                                            button.btn.btn-primary.flex-grow-1.uav(id='returnToLaunchBtn' type='button')
-                                                svg.bi(width='16' height='16' role='img')
-                                                    use(xlink:href='#arrow-90deg-down')
-                                                |   Return to launch
-                                            button.btn.btn-secondary.flex-grow-1.uav(id='setHomeBtn' type='button') Set home
-                                        div.text-center.uav
-                                            strong Camera elevation angle
-                                            div.d-flex.align-items-center
-                                                small -90°
-                                                input.form-range.mx-2(type="range" name="elevationRange" min="-90" max="90" step="15" id="elevationRange" value=0)
-                                                small +90°
-                                        div.text-center.uav
-                                            strong Camera zoom
-                                            div.d-flex.align-items-center
-                                                small 1×
-                                                input.form-range.mx-2(type="range" name="zoomRange" min="1" max="4" step="1" id="zoomRange" value=1)
-                                                small 4×
-                                // Ping
-                                div.tab-pane.fade(id="mode-ping" role="tabpanel" aria-labelledby="ping-tab")
-                                    div.text-center.border-bottom.py-2
-                                        svg.bi.me-2(width='24' height='24' role='img')
-                                            use(xlink:href='#crosshair')
-                                        span.h2 Ping
-                                    div.d-grid.gap-2.pt-2
-                                        button(id='pingBtn' type='button').btn.btn-primary
-                                            svg.bi(width='16' height='16' role='img')
-                                                use(xlink:href='#crosshair')
-                                            |   Ping a location
-                                        button(id='clearPingBtn' type='button').btn.btn-danger
-                                            svg.bi(width='16' height='16' role='img')
-                                                use(xlink:href='#x-circle')
-                                            |   Remove pings
-                                // Strategic points
-                                div.tab-pane.fade(id="mode-strategic-points" role="tabpanel" aria-labelledby="strategic-points-tab")
-                                    div.text-center.border-bottom.py-2
-                                        svg.bi.me-2(width='24' height='24' role='img')
-                                            use(xlink:href='#flag')
-                                        span.h2 Strategic Points
-                                    div.d-grid.pt-2
-                                        ul.list-group.border-bottom-0(id='strategicPointsList')
-                                        ul.list-group.border-bottom(id="stratPointInfo" style="display:none")
-                                            li.list-group-item.d-flex.justify-content-center
-                                                div.d-flex.gap-2
-                                                    button.btn.btn-danger(id="defuseBtn") Defuse
-                                            li.list-group-item.d-flex.justify-content-center
-                                                div.d-flex.gap-2(id="stratPointString") 
-                                
-                        a.collapse-bar.d-flex.justify-content-center.py-2.mx-5(data-bs-toggle='collapse' data-bs-target='#omnibox-content' role='button' aria-expanded='false' aria-controls='omnibox-content')
-                            svg(xmlns='http://www.w3.org/2000/svg' width='12em' height='8px')
-                                rect(rx='4' ry='4' width='100%' height='8' fill='#adb5bd' fill-opacity='.8')
-                    div.bg-black.rounded-4.shadow.overflow-hidden(id='stream-display-container')
+                                        |   Ping a location
+                                    button(id='clearPingBtn' type='button').btn.btn-danger
+                                        svg.bi(width='16' height='16' role='img')
+                                            use(xlink:href='#x-circle')
+                                        |   Remove pings
+                            // Strategic points
+                            div.tab-pane.fade(id="mode-strategic-points" role="tabpanel" aria-labelledby="strategic-points-tab")
+                                div.text-center.border-bottom.py-2
+                                    svg.bi.me-2(width='24' height='24' role='img')
+                                        use(xlink:href='#flag')
+                                    span.h2 Strategic Points
+                                div.d-grid.pt-2
+                                    ul.list-group.border-bottom-0(id='strategicPointsList')
+                                    ul.list-group.border-bottom(id="stratPointInfo" style="display:none")
+                                        li.list-group-item.d-flex.justify-content-center
+                                            div.d-flex.gap-2
+                                                button.btn.btn-danger(id="defuseBtn") Defuse
+                                        li.list-group-item.d-flex.justify-content-center
+                                            div.d-flex.gap-2(id="stratPointString") 
+                            // POST Status
+                            div.tab-pane.fade(id="mode-post-status" role="tabpanel" aria-labelledby="post-status-tab")
+                                div.text-center.border-bottom.py-2
+                                    svg.bi.me-2(width='24' height='24' role='img')
+                                        use(xlink:href='#upload')
+                                    span.h2 POST Status
+                                div.d-grid.gap-2.pt-2   
+                                    form.needs-validation(action="" method="post" id="post-status-form")
+                                        label(for="postStatusURL") URL
+                                        //- input.form-control(type="text" id="postStatusURL" placeholder="URL" name="url" value="https://6bus5bof45.execute-api.eu-west-3.amazonaws.com/dev/trackers")
+                                        input.form-control(type="text" id="postStatusUrl" placeholder="URL" name="url" value="http://localhost:8082")
+                                        label(for="ms") Rate (ms)                                         
+                                        input.form-control(type="text" id="postStatusRate" placeholder="Rate" name="rate" value="1000")
+                                        label(for="template") Template JSON                                         
+                                        textarea.form-control(id="postStatusTemplate" placeholder="Template" name="template" rows="5") 
+                                            |{
+                                            |    "team": "",
+                                            |    "auth": "",
+                                            |    "source": ""
+                                            |}
+                                    div.form-floating.mt-2
+                                        button.w-100.btn.btn-primary(id="post-status-toggle") Enable
+                            
+                    a.collapse-bar.d-flex.justify-content-center.py-2.mx-5(data-bs-toggle='collapse' data-bs-target='#omnibox-content' role='button' aria-expanded='false' aria-controls='omnibox-content')
+                        svg(xmlns='http://www.w3.org/2000/svg' width='12em' height='8px')
+                            rect(rx='4' ry='4' width='100%' height='8' fill='#adb5bd' fill-opacity='.8')
+                //Video
+                div.bg-black.rounded-4.shadow.overflow-hidden(id='stream-display-container')
 
-                        //video(id='video-stream-display' autoplay muted playsinline)
-                        video.video-stream(id='video-stream-display' autoplay muted playsinline)
-                        img.img-fluid.rounded.image-stream(id='image-stream-display')
-                        //img.position-absolute.top-50.translate-middle-y(style='display: block; max-height: 100%; width: 100%;' alt='Stream display' src='http://11.0.0.11:8888/stream?topic=/zed_node/rgb/image_rect_color')
-                        a.position-absolute.top-0.end-0.rounded.p-3.me-1(id='changeVideoSourceBtn' role='button')
-                            svg.bi.pe-none.text-light(width='22' height='22' role='img')
-                                use(xlink:href='#repeat')
-                        a.position-absolute.bottom-0.start-0.rounded.p-3.ms-1(id='fullScreenStreamDisplayBtn' role='button')
-                            svg.bi.pe-none.text-light(width='22' height='22' role='img')
-                                use(xlink:href='#fullscreen')
-                        a.position-absolute.bottom-0.end-0.rounded.p-3.me-1(id='enableAudioBtn' role='button')
-                            svg.bi.pe-none.text-light(width='22' height='22' role='img')
-                                use(xlink:href='#volume-mute')
-                    div.joystick-left(id='joystick-left')
-                    div.joystick-right(id='joystick-right')
+                    //video(id='video-stream-display' autoplay muted playsinline)
+                    video.video-stream(id='video-stream-display' autoplay muted playsinline)
+                    img.img-fluid.rounded.image-stream(id='image-stream-display')
+                    //img.position-absolute.top-50.translate-middle-y(style='display: block; max-height: 100%; width: 100%;' alt='Stream display' src='http://11.0.0.11:8888/stream?topic=/zed_node/rgb/image_rect_color')
+                    a.position-absolute.top-0.end-0.rounded.p-3.me-1(id='changeVideoSourceBtn' role='button')
+                        svg.bi.pe-none.text-light(width='22' height='22' role='img')
+                            use(xlink:href='#repeat')
+                    a.position-absolute.bottom-0.start-0.rounded.p-3.ms-1(id='fullScreenStreamDisplayBtn' role='button')
+                        svg.bi.pe-none.text-light(width='22' height='22' role='img')
+                            use(xlink:href='#fullscreen')
+                    a.position-absolute.bottom-0.end-0.rounded.p-3.me-1(id='enableAudioBtn' role='button')
+                        svg.bi.pe-none.text-light(width='22' height='22' role='img')
+                            use(xlink:href='#volume-mute')
+                //Joysticks
+                div.joystick-left(id='joystick-left')
+                div.joystick-right(id='joystick-right')
 
         // Settings
         div.offcanvas.offcanvas-start(data-bs-scroll='false' tabindex='-1' aria-labelledby='offcanvasLabelSettings' id="offcanvasSettings")
