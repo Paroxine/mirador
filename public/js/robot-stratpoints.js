@@ -31,7 +31,7 @@ class StratPoint {
         if (this.hidden) return;
         
         let color = { 0: "green", 1: "red", 2: "orange" }[this.status];
-        let type  = { 0: "unknown", 1: "hybrid", 2: "terrestrial", 3: "aerial" }[this.type];
+        let type  = { 0: "unknown", 1: "hybrid", 2: "ground", 3: "aerial" }[this.type];
         var trapIcon = L.icon({
             iconUrl: "../public/css/images/"+type+"_trap_"+color+".svg",
             iconSize:     [30, 30],
