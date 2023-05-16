@@ -1,4 +1,5 @@
-import robot_stratpoints from "/public/js/robot-stratpoints.js"
+import robot_stratpoints from "/public/js/robot-stratpoints.js";
+import robot_post_status from "/public/js/robot-post-status.js";
 
 'use strict'
 
@@ -82,6 +83,10 @@ const strategicPointsTab = document.getElementById('strategic-points')
 strategicPointsTab.addEventListener('shown.bs.tab', event => {
     document.location.hash = 'strategic-points';
     mode = 7;
+})
+const postStatusTab = document.getElementById('post-status')
+postStatusTab.addEventListener('shown.bs.tab', event => {
+    document.location.hash = 'post-status';
 })
 
 controlTab.addEventListener('hide.bs.tab', event => {
@@ -1406,63 +1411,5 @@ window.onunload = window.onbeforeunload = () => {
     if (typeof peerConnection !== 'undefined') { peerConnection.close(); }
 }
 
-// ENVOIE POSITION AU POSTE DE COMMANDEMENT
-
-const BLT_MS = 1000;
-const BLT_URL = " https://6bus5bof45.execute-api.eu-west-3.amazonaws.com/dev/trackers";
-const BLT_NTP = "0.fr.pool.ntp.org";
-
-let blt_template = {
-    "team": "musher",
-    "auth": "hvw7-tasf-ipz7-wsph-lrq9",
-    "source": robot.name,
-    "geolocation": {
-        "latitude": 0,
-        "longitude": 0
-    },
-    "altitude": 0,
-    "timestamp": 1670880478000
-}
-let ntp_difference = ntpSync();
-const blt_source = "...";
-const blt_interval = setInterval(() => {
-    bltCallback();
-},BLT_MS);
-
-function ntpSync() {
-    let request = new XMLHttpRequest();
-    request.onreadystatechange = () => {
-        var returned = (new Date).getTime();
-        if (request.readyState === 4 && request.status === 200) {
-            var timestamp = request.responseText.split('|');
-            var original = + timestamp[0];
-            var receive = + timestamp[1];
-            var transmit = + timestamp[2];
-
-            var sending = receive - original;
-            var receiving = returned - transmit;
-            var roundtrip = sending + receiving;
-            var oneway = roundtrip / 2;
-            var difference = sending - oneway;
-            return difference;
-        }
-    };
-    request.open("POST", BLT_NTP, true);
-    request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-    request.send("original=" + (new Date).getTime());
-}
-
-function bltCallback() {
-    let blt_message = blt_template;
-    blt_message.geolocation = {
-        "latitude": robot.position.latitude,
-        "longitude" : robot.position.longitude
-    }
-    blt_message.altitude = robot.position.altitude;
-    blt_message.timestamp = Date.now();
-    
-    var xhr = new XMLHttpRequest();
-    xhr.open("POST", BLT_URL, true);
-    xhr.setRequestHeader('Content-Type', 'application/json');
-    xhr.send(JSON.stringify(blt_message));
-}
+//POST STATUS 
+robot_post_status.setup(() => robot);
