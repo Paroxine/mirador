@@ -392,7 +392,6 @@ function updatePose(pose) {
 // ROS
 
 var ros;
-var streamTopic = "image/compressed";
 var rosReconnectLoop = setInterval(connectToRos, 5000);
 
 function connectToRos() {
@@ -545,13 +544,10 @@ robotStatusListener.subscribe(function (status) {
     }
     if (status.stream_topic !== robotStatus.stream_topic) {
         robotStatus.stream_topic = status.stream_topic;
-
-        //Update ROS subscribe topic
-        if (robot_video.enabled) //if video is enabled
-            robot_video.setTopic(robotStatus.stream_topic)
+        robot_video.setTopic(robotStatus.stream_topic)
     }
     if (status.stream_method !== robotStatus.stream_method) {
-        robot_video.updateStreamMethod(status.stream_method);
+        //robot_video.updateStreamMethod(status.stream_method);
         robotStatus.stream_method = status.stream_method;
     }
 
@@ -1036,14 +1032,14 @@ document.getElementById('fullScreenStreamDisplaySwitch').addEventListener('chang
 });
 
 // STREAM
-
+/*
 document.getElementById('fullScreenStreamDisplayBtn').addEventListener('click', () => {
     toggleFullScreenDisplay();
 });
 
 document.getElementById('enableAudioBtn').addEventListener('click', () => {
     let streamDisplay = document.getElementById('video-stream-display');
-    let svgVolume = document.querySelector('#enableAudioBtn > svg > use');
+    
     if (streamDisplay.toggleAttribute('muted')) {
         streamDisplay.muted = true;
         svgVolume.setAttribute('xlink:href', '#volume-mute');
@@ -1073,6 +1069,8 @@ document.getElementById('changeVideoSourceBtn').addEventListener('click', () => 
     socket.emit("changeVideoSource");
     navigator.vibrate(HAPTIC_VIBRATION_TIME);
 });
+
+*/
 
 // let videoStreamListener;
 
@@ -1446,4 +1444,4 @@ robot_warnings.setup(ros, toast);
 robot_geojson.setup(map);
 
 //VIDEO
-robot_video.setup();
+robot_video.setup(ros);

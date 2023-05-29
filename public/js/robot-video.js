@@ -1,8 +1,33 @@
-let videoStreamListener;
-let streamTopic;
+let ros;
+var streamTopic = "/zed_node/rgb/image_rect_color/compressed";
 const HAPTIC_VIBRATION_TIME = 20;
-let streamImage;
+let streamImage = document.getElementById('image-stream-display');
 let video_enabled = false;
+let videoStreamListener
+
+
+function hideImageElements() {
+    let image = document.querySelectorAll('.image-stream');
+    image.forEach(element => {
+        element.style.display = 'none';
+    });
+}
+
+function showImageElements() {
+    let image = document.querySelectorAll('.image-stream');
+    image.forEach(element => {
+        element.style.display = 'inline';
+    });
+}
+
+hideVideoElements();
+function hideVideoElements() {
+    let video = document.querySelectorAll('.video-stream');
+    video.forEach(element => {
+        element.style.display = 'none';
+    });
+}
+
 
 function toggleFullScreenDisplay() {
     let streamDisplayContainer = document.getElementById('stream-display-container');
@@ -18,17 +43,30 @@ function toggleFullScreenDisplay() {
     }
 }
 
-function setup() {
+function setup(_ros) {
+    ros = _ros; 
+
+    videoStreamListener = new ROSLIB.Topic({
+        ros: ros,
+        name: streamTopic,
+        messageType: 'sensor_msgs/CompressedImage'
+    }); 
+
     document.getElementById('enableVideoBtn').addEventListener('click', () => {
         let streamDisplay = document.getElementById('video-stream-display');
         let enableBtn = document.querySelector("#enableVideoBtn > svg > use")
         if (streamDisplay.toggleAttribute('on')) {
             streamDisplay.on = true;
             enableBtn.setAttribute('xlink:href', '#toggle-on');
+            enableVideo();
+            console.log("On");
+            
         }
         else {
             streamDisplay.on = false;
             enableBtn.setAttribute('xlink:href', '#toggle-off');
+            disableVideo()
+            console.log("Off");
         }
     });
 
@@ -61,56 +99,37 @@ function setup() {
     });
 }
 
-function updateStreamMethod(method) {
-    switch (method) {
-        case 0:
-            hideImageElements();
-            break;
-        case 1:
-            hideImageElements();
-            break;
-        case 2:
-            hideVideoElements();
-            console.log("Topic Video on topic: "+ videoStreamListener.name);
-            streamImage = document.getElementById('image-stream-display');
-            enableVideo();
-  
-            break;
-        default:
-      }
-}
-
-function videoCallback(message) {
-    streamImage.src = "data:image/jpg;base64," + message.data;
-}
-
-
 function enableVideo() {
+    //hideVideoElements();
+    showImageElements();
     if (video_enabled) disableVideo();
+    videoStreamListener.subscribe(function videoCallback(message) {
+        streamImage.src = "data:image/jpg;base64," + message.data;
+        console.log("frame");
+    });
 
-    videoStreamListener = new ROSLIB.Topic({
-        ros: ros,
-        name: streamTopic,
-        messageType: 'sensor_msgs/CompressedImage'
-    });    
-    videoStreamListener.subscribe(videoCallback);
+    console.log("Video Enabled on: " + videoStreamListener.name);
 
     video_enabled = true;
 }
 
 function disableVideo() {
+    //hideVideoElements();
+    hideImageElements();
     if (!video_enabled) return;
-    videoStreamListener.unsubscribe(videoCallback);
+    videoStreamListener.unsubscribe();
+    console.log("Video Disabled");
     video_enabled = false;
+
 }
 
 function setTopic(topic) { 
     if (video_enabled) {
-        disableVideo();
-        streamTopic = topic;
-        enableVideo();
+        //disableVideo();
+        videoStreamListener.name = topic;
+        //enableVideo();
     } else 
-        streamTopic = topic;
+        videoStreamListener.name = topic;
     
 }
 

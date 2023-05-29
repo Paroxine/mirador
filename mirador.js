@@ -60,7 +60,7 @@ io.on("connection", (socket) => {
             robots[socket.id].job = job;
         }
         io.to("robots").emit("siblings", (robots));
-        console.log(robots);
+        //console.log(robots);
         //io.to("robots").emit("mesh_signals", (mesh_signals));
     });
     socket.on("broadcaster", () => {
