@@ -3,6 +3,7 @@ import robot_post_status from "/public/js/robot-post-status.js";
 import robot_mesh_draw  from "/public/js/robot-mesh-draw.js";
 import robot_warnings from "/public/js/robot-warnings.js";
 import robot_geojson from "/public/js/robot-geojson.js";
+import robot_video from "/public/js/robot-video.js";
 
 'use strict'
 
@@ -546,10 +547,11 @@ robotStatusListener.subscribe(function (status) {
         robotStatus.stream_topic = status.stream_topic;
 
         //Update ROS subscribe topic
-        videoStreamListener.name = robotStatus.stream_topic;
+        if (robot_video.enabled) //if video is enabled
+            robot_video.setTopic(robotStatus.stream_topic)
     }
     if (status.stream_method !== robotStatus.stream_method) {
-        updateStreamMethod(status.stream_method);
+        robot_video.updateStreamMethod(status.stream_method);
         robotStatus.stream_method = status.stream_method;
     }
 
@@ -1072,24 +1074,24 @@ document.getElementById('changeVideoSourceBtn').addEventListener('click', () => 
     navigator.vibrate(HAPTIC_VIBRATION_TIME);
 });
 
-let videoStreamListener;
+// let videoStreamListener;
 
-function enableVideo() {
-    videoStreamListener = new ROSLIB.Topic({
-        ros: ros,
-        name: streamTopic,
-        //"/zed_node/rgb/image_rect_color/compressed",
-        messageType: 'sensor_msgs/CompressedImage'
-    });
+// function enableVideo() {
+//     videoStreamListener = new ROSLIB.Topic({
+//         ros: ros,
+//         name: streamTopic,
+//         //"/zed_node/rgb/image_rect_color/compressed",
+//         messageType: 'sensor_msgs/CompressedImage'
+//     });
 
-    videoStreamListener.subscribe(function (message) {
-        streamImage.src = "data:image/jpg;base64," + message.data;
-    });
-}
+//     videoStreamListener.subscribe(function (message) {
+//         streamImage.src = "data:image/jpg;base64," + message.data;
+//     });
+// }
 
-function disableVideo() {
-    videoStreamListener = undefined;
-}
+// function disableVideo() {
+//     videoStreamListener = undefined;
+// }
 
 // PAGE INIT
 
@@ -1261,27 +1263,6 @@ function updateIsRunning(is_running) {
 
     else {
         isRunningElement.style.setProperty("display", "none");
-    }
-}
-
-function updateStreamMethod(method) {
-  switch (method) {
-      case 0:
-          hideImageElements();
-          break;
-      case 1:
-          hideImageElements();
-          break;
-      case 2:
-          hideVideoElements();
-          console.log("Topic Video on topic: "+ videoStreamListener.name);
-          const streamImage = document.getElementById('image-stream-display');
-          videoStreamListener.subscribe(function (message) {
-              streamImage.src = "data:image/jpg;base64," + message.data;
-          });
-
-          break;
-      default:
     }
 }
 
@@ -1463,3 +1444,6 @@ robot_warnings.setup(ros, toast);
 
 //GEOJSON
 robot_geojson.setup(map);
+
+//VIDEO
+robot_video.setup();
