@@ -2,7 +2,10 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const path = require('path');
 const index = require(path.join(__dirname, 'routes/index'));
+const { NodeSSH } = require("node-ssh");
+const mesh_config = require("./mesh.config.js");
 
+const ssh = new NodeSSH();
 const app = express();
 
 app.set('views', path.join(__dirname, 'views'));
@@ -22,15 +25,16 @@ const server = app.listen(port, hostname, () => {
     console.log(`Mirador is running on http://${hostname}:${port}/`);
 })
 
+
+//GLOBALS
 let robots = {};
 let strategic_points = [];
 let pings = {}
+const known_macs = knownMacs(mesh_config);
+setInterval(updateMeshSignals, 1000);
 
+//SOCKETS
 const io = require('socket.io')(server);
-
-const mirador = require('./public/js/miradorlib.js');
-const { randomUUID } = require('crypto');
-
 io.on("connection", (socket) => {
 
     socket.on("login", (robot) => {
@@ -56,6 +60,8 @@ io.on("connection", (socket) => {
             robots[socket.id].job = job;
         }
         io.to("robots").emit("siblings", (robots));
+        console.log(robots);
+        //io.to("robots").emit("mesh_signals", (mesh_signals));
     });
     socket.on("broadcaster", () => {
         let address = socket.request.connection.remoteAddress;
@@ -79,7 +85,6 @@ io.on("connection", (socket) => {
     socket.on("changeVideoSource", () => {
         socket.to(robots[socket.id].address).emit("changeVideoSource");
     });
-
 
     //PINGS
     socket.emit("updatePings", pings);
@@ -131,12 +136,7 @@ io.on("connection", (socket) => {
     });
 });
 
-const POSITION_MIN_DISTANCE = 0.0001;
-function samePosition(p1, p2) {
-    return Math.abs(p1.longitude - p2.longitude) < POSITION_MIN_DISTANCE &&
-           Math.abs(p1.latitude  - p2.latitude) < POSITION_MIN_DISTANCE/2;
-}
-
+//UTILS
 function sameContent(p1, p2) {
     //Check if the Content is different or if the trap is a POI
     console.log(p2);
@@ -147,4 +147,60 @@ function sameContent(p1, p2) {
         //console.log("New server");
         return 0;
     }
+}
+
+function getMeshDump(node) {
+    console.log(node);
+    return ssh.connect({
+        host: node.host,
+        username: node.username,
+        password: node.password 
+    }).then(() => ssh.execCommand(`iw dev ${node.mesh_dev} station dump`));
+}
+
+function getMeshSignals(node) {
+    return getMeshDump(node)
+    .then(parseMeshDump)
+    .catch(err => {
+        console.log("Failed to retrieve mesh signal data from " + node.host);
+        console.log(err); 
+    });
+}
+
+function parseMeshDump(dump) {
+    dump = dump.split("\n")
+    let current_station = "";
+    let signals = {};
+    for (let line of dump) {
+        let parts = line.trim().split(" ");
+        if (parts[0] == "Station") current_station = parts[1];
+        else if (parts[0] == "signal:") signals[current_station] = parts[1];
+    }
+    for (let mac of Object.keys(signals)) { //replace MAC addresses with the corresponding robots' IPs
+        let robot_ip = known_macs[mac];
+        if (robot_ip) signals[robot_ip] = signals[mac];
+        delete signals[mac];
+    }
+    return signals;
+}
+
+function updateMeshSignals() {
+    let mesh_signals = {}
+    return Promise.all( //Once all signal qualities have been collected
+        Object.entries(mesh_config).map(([robot_ip,node]) => {
+            // getMeshSignals(node).then(signals => mesh_signals[robot_ip] = signals);
+        })
+    ).then(() => {
+        mesh_signals["11.0.0.11"] = { "11.0.0.12" : "-34"};
+        mesh_signals["11.0.0.12"] = { "11.0.0.11" : "-34"};
+        io.sockets.emit("mesh_signals", mesh_signals)
+    });
+}
+
+function knownMacs() {
+    let mac_robot = {}; //maps the robot's IP to the router's mesh MAC
+    Object.entries(mesh_config).forEach((robot_ip, mesh_node) => {
+        mac_robot[mesh_node.mac] = robot_ip;
+    })
+    return mac_robot;
 }
