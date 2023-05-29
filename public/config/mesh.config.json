@@ -1,0 +1,12 @@
+[
+    { 
+        "router_ip": "11.0.0.51",
+        "router_mac":"",
+        "robot_ip": "11.0.0.11"
+    },
+    {
+        "router_ip": "11.0.0.52",
+        "router_mac":"",
+        "robot_ip":""
+    }
+]

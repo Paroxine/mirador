@@ -1,5 +1,8 @@
 import robot_stratpoints from "/public/js/robot-stratpoints.js";
 import robot_post_status from "/public/js/robot-post-status.js";
+import robot_mesh_draw  from "/public/js/robot-mesh-draw.js";
+import robot_warnings from "/public/js/robot-warnings.js";
+import robot_geojson from "/public/js/robot-geojson.js";
 
 'use strict'
 
@@ -419,12 +422,16 @@ var robotStatusListener = new ROSLIB.Topic({
     //messageType: 'robot_sim/Status'
 });
 
-var videoStreamListener = new ROSLIB.Topic({
-    ros: ros,
-    name: streamTopic,
-    //"/zed_node/rgb/image_rect_color/compressed",
-    messageType: 'sensor_msgs/CompressedImage'
-});
+// var robotWarningListener = new ROSLIB.Topic({
+//     ros: ros,
+//     name: "/mirador/warning",
+//     messageType: "mirador_driver/Warning"
+// })
+// robotWarningListener.subscribe((warning_msg) => {
+//     console.log(warning_msg);
+//     toast("ROS : " + warning_msg.message)
+// });
+
 
 // Publishers
 
@@ -1045,10 +1052,44 @@ document.getElementById('enableAudioBtn').addEventListener('click', () => {
     }
 });
 
+document.getElementById('enableVideoBtn').addEventListener('click', () => {
+    let streamDisplay = document.getElementById('video-stream-display');
+    let enableBtn = document.getElementById("#enableVideoBtn > svg > use")
+    if (streamDisplay.toggleAttribute('on')) {
+        streamDisplay.on = true;
+        svgVolume.setAttribute('xlink:href', '#toggle-on');
+        enableVideo()
+    }
+    else {
+        streamDisplay.on = false;
+        svgVolume.setAttribute('xlink:href', '#toggle-off');
+        disableVideo()
+    }
+});
+
 document.getElementById('changeVideoSourceBtn').addEventListener('click', () => {
     socket.emit("changeVideoSource");
     navigator.vibrate(HAPTIC_VIBRATION_TIME);
 });
+
+let videoStreamListener;
+
+function enableVideo() {
+    videoStreamListener = new ROSLIB.Topic({
+        ros: ros,
+        name: streamTopic,
+        //"/zed_node/rgb/image_rect_color/compressed",
+        messageType: 'sensor_msgs/CompressedImage'
+    });
+
+    videoStreamListener.subscribe(function (message) {
+        streamImage.src = "data:image/jpg;base64," + message.data;
+    });
+}
+
+function disableVideo() {
+    videoStreamListener = undefined;
+}
 
 // PAGE INIT
 
@@ -1413,3 +1454,12 @@ window.onunload = window.onbeforeunload = () => {
 
 //POST STATUS 
 robot_post_status.setup(() => robot);
+
+//MESH DRAW
+robot_mesh_draw.setup(socket, map, siblings);
+
+//FEEDBACK
+robot_warnings.setup(ros, toast);
+
+//GEOJSON
+robot_geojson.setup(map);

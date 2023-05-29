@@ -192,7 +192,14 @@ html
             symbol#upload(viewbox="0 0 16 16")
                 path(d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z")
                 path(d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V2.707L5.354 4.854a.5.5 0 1 1-.708-.708l3-3z")
-        
+            symbol#toggle-off(viewbox="0 0 16 16")
+                path(d="M9 11c.628-.836 1-1.874 1-3a4.978 4.978 0 0 0-1-3h4a3 3 0 1 1 0 6H9z")
+                path(d="M5 12a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm0 1A5 5 0 1 0 5 3a5 5 0 0 0 0 10z")
+            symbol#toggle-on(viewbox="0 0 16 16")
+                path(d="M7 5H3a3 3 0 0 0 0 6h4a4.995 4.995 0 0 1-.584-1H3a2 2 0 1 1 0-4h3.416c.156-.357.352-.692.584-1z")
+                path(d="M16 8A5 5 0 1 1 6 8a5 5 0 0 1 10 0z")
+
+
         // Screen
         div.container-fluid.d-flex.p-0
             //Tab selection
@@ -496,6 +503,10 @@ html
                     a.position-absolute.bottom-0.end-0.rounded.p-3.me-1(id='enableAudioBtn' role='button')
                         svg.bi.pe-none.text-light(width='22' height='22' role='img')
                             use(xlink:href='#volume-mute')
+                    a.position-absolute.top-0.start-0.rounded.p-3.me-1(id='enableVideoBtn' role='button')
+                        svg.bi.pe-none.text-light(width='22' height='22' role='img')
+                            use(xlink:href='#toggle-off')
+                    
                 //Joysticks
                 div.joystick-left(id='joystick-left')
                 div.joystick-right(id='joystick-right')
