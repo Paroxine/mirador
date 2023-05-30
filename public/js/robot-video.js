@@ -115,7 +115,7 @@ function enableVideo() {
 
 function disableVideo() {
     //hideVideoElements();
-    hideImageElements();
+    //hideImageElements();
     if (!video_enabled) return;
     videoStreamListener.unsubscribe();
     console.log("Video Disabled");

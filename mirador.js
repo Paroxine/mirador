@@ -31,7 +31,8 @@ let robots = {};
 let strategic_points = [];
 let pings = {}
 const known_macs = knownMacs(mesh_config);
-setInterval(updateMeshSignals, 1000);
+const MESH_SIGNAL_UPDATE_RATE = 5000;
+setInterval(updateMeshSignals, MESH_SIGNAL_UPDATE_RATE);
 
 //SOCKETS
 const io = require('socket.io')(server);
@@ -150,56 +151,73 @@ function sameContent(p1, p2) {
 }
 
 function getMeshDump(node) {
-    console.log(node);
+    // console.log(node);
     return ssh.connect({
         host: node.host,
         username: node.username,
         password: node.password 
-    }).then(() => ssh.execCommand(`iw dev ${node.mesh_dev} station dump`));
+    })
+    .then(() => ssh.execCommand(`iw dev ${node.mesh_dev} station dump`).catch(e => {}))
+    .catch(e => { console.log(`SSH session to ${node.host} failed.`)});
+    // .catch(err => { console.log("handled ")});
 }
 
 function getMeshSignals(node) {
     return getMeshDump(node)
-    .then(parseMeshDump)
-    .catch(err => {
-        console.log("Failed to retrieve mesh signal data from " + node.host);
-        console.log(err); 
-    });
+    .then(ssh_ret => {
+        try {
+            if (ssh_ret) return parseMeshDump(ssh_ret.stdout);
+        } catch(e) {
+            console.log("Failed to parse mesh signal data from " + node.host);
+            console.log(err);
+            console.log("----");
+            return({});
+        }
+    })
 }
 
 function parseMeshDump(dump) {
-    dump = dump.split("\n")
+    console.log("Parsing mesh signals...");
+    dump = dump.replaceAll("\t", " ");
+    dump = dump.replaceAll("[", " ");
+    dump = dump.split("\n");
     let current_station = "";
     let signals = {};
     for (let line of dump) {
         let parts = line.trim().split(" ");
         if (parts[0] == "Station") current_station = parts[1];
-        else if (parts[0] == "signal:") signals[current_station] = parts[1];
+        else if (parts[0] == "signal:") signals[current_station] = parts[3];
     }
+    let ip_signals = {}
     for (let mac of Object.keys(signals)) { //replace MAC addresses with the corresponding robots' IPs
         let robot_ip = known_macs[mac];
-        if (robot_ip) signals[robot_ip] = signals[mac];
-        delete signals[mac];
+        if (robot_ip) ip_signals[robot_ip] = signals[mac];
     }
-    return signals;
+    return ip_signals;
 }
 
 function updateMeshSignals() {
-    let mesh_signals = {}
+    console.log("Updating mesh signals...");
     return Promise.all( //Once all signal qualities have been collected
-        Object.entries(mesh_config).map(([robot_ip,node]) => {
-            // getMeshSignals(node).then(signals => mesh_signals[robot_ip] = signals);
-        })
-    ).then(() => {
-        mesh_signals["11.0.0.11"] = { "11.0.0.12" : "-34"};
-        mesh_signals["11.0.0.12"] = { "11.0.0.11" : "-34"};
+        Object.values(mesh_config).map(getMeshSignals)
+    ).then(returns => {
+        let mesh_signals = {}
+        for (let i=0; i<Object.keys(mesh_config).length; i++) {
+            let robot_ip = Object.keys(mesh_config)[i];
+            let robot_signals = returns[i];
+            mesh_signals[robot_ip] = robot_signals;
+        }
+        // mesh_signals["11.0.0.11"] = { "11.0.0.12" : "-34"};
+        // mesh_signals["11.0.0.12"] = { "11.0.0.11" : "-34"};
         io.sockets.emit("mesh_signals", mesh_signals)
     });
 }
 
 function knownMacs() {
     let mac_robot = {}; //maps the robot's IP to the router's mesh MAC
-    Object.entries(mesh_config).forEach((robot_ip, mesh_node) => {
+    Object.entries(mesh_config).forEach(pair => {
+        let robot_ip = pair[0];
+        let mesh_node = pair[1];
         mac_robot[mesh_node.mac] = robot_ip;
     })
     return mac_robot;

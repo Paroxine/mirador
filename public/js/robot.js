@@ -1432,10 +1432,60 @@ window.onunload = window.onbeforeunload = () => {
 }
 
 //POST STATUS 
-robot_post_status.setup(() => robot);
+// robot_post_status.setup(() => robot);
+
+let fake_robot;
+fakeRobot();
+
+function fakeRobot() {
+    const fake_robots = [
+        {
+            "ip": "11.0.0.11",
+            "latitude": 48.862909,
+            "longitude": 1.900626,
+            "altitude": 100
+        },
+        {
+            "ip": "11.0.0.12",
+            "latitude": 48.863967,
+            "longitude": 1.904147,
+            "altitude": 100
+        },
+        {
+            "ip": "11.0.0.21",
+            "latitude": 48.865439,
+            "longitude": 1.902580,
+            "altitude": 100
+        },
+        {
+            "ip": "11.0.0.22",
+            "latitude": 48.862601,
+            "longitude": 1.904635,
+            "altitude": 100          
+        }
+    ]
+
+    const queryString = window.location.search;
+    let params = new URLSearchParams(queryString);
+
+    if (params.has("fake")) {
+        let fake_id = params.get("fake");
+        toast("Loading fake robot n°" + fake_id);
+        fake_robot = fake_robots[fake_id];
+
+        let fake_interval = setInterval(() => {
+            updatePose({
+                "latitude": fake_robot.latitude,
+                "longitude": fake_robot.longitude,
+                "altitude": fake_robot.altitude
+            });
+        },1000);
+    }
+}
+
 
 //MESH DRAW
-robot_mesh_draw.setup(socket, map, siblings);
+robot_mesh_draw.setup(socket, map, siblings, () => robot, fake_robot);
 
 //FEEDBACK
 robot_warnings.setup(ros, toast);
@@ -1445,3 +1495,68 @@ robot_geojson.setup(map);
 
 //VIDEO
 robot_video.setup(ros);
+
+
+function postStatusSetup() {
+    const BLT_MS = 1000;
+    const BLT_URL = " https://6bus5bof45.execute-api.eu-west-3.amazonaws.com/dev/trackers";
+    const BLT_NTP = "0.fr.pool.ntp.org";
+
+    let blt_template = {
+        "team": "musher",
+        "auth": "hvw7-tasf-ipz7-wsph-lrq9",
+        "source": robot.name,
+        "geolocation": {
+            "latitude": 0,
+            "longitude": 0
+        },
+        "altitude": 0,
+        "timestamp": 1670880478000
+    }
+    // let ntp_difference = ntpSync();
+    // const blt_source = "...";
+    const blt_interval = setInterval(() => {
+        bltCallback();
+    },BLT_MS);
+
+    function ntpSync() {
+        let request = new XMLHttpRequest();
+        request.onreadystatechange = () => {
+            var returned = (new Date).getTime();
+            if (request.readyState === 4 && request.status === 200) {
+                var timestamp = request.responseText.split('|');
+                var original = + timestamp[0];
+                var receive = + timestamp[1];
+                var transmit = + timestamp[2];
+
+                var sending = receive - original;
+                var receiving = returned - transmit;
+                var roundtrip = sending + receiving;
+                var oneway = roundtrip / 2;
+                var difference = sending - oneway;
+                return difference;
+            }
+        };
+        request.open("POST", BLT_NTP, true);
+        request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+        request.send("original=" + (new Date).getTime());
+    }
+
+    function bltCallback() {
+        let blt_message = blt_template;
+        blt_message.geolocation = {
+            "latitude": parseFloat(robot.position.latitude),
+            "longitude" : parseFloat(robot.position.longitude)
+        }
+        blt_message.altitude = robot.position.altitude;
+        blt_message.timestamp = Date.now();
+
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", BLT_URL, true);
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.send(JSON.stringify(blt_message));
+    }
+}
+
+postStatusSetup();
+
